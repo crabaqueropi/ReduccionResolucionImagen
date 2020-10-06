@@ -269,6 +269,22 @@ Mat cambiarTamanoImagen(Mat img, int row, int nuevoNcolumnas)
 //CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 //CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 //CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int outR[2][2], int outG[2][2], int outB[2][2])
+{
+    for (int k = 0; k < 2; k++)
+    {
+        for (int l = 0; l < 2; l++)
+        {
+            outR[k][l] = imgR[k][l];
+            outG[k][l] = imgG[k][l];
+            outB[k][l] = imgB[k][l];
+        }
+    }
+}
+
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[4][4], int outG[4][4], int outB[4][4])
 {
     for (int k = 0; k < 4; k++)
@@ -300,12 +316,13 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
 
 int main(int argc, char **argv)
 {
-    // Read image
-    Mat img = imread("imagen4k.jpg", CV_LOAD_IMAGE_COLOR);
+    // Leer imágen
+    Mat img = imread("imagen720p.jpg", CV_LOAD_IMAGE_COLOR);
 
     cout << "La imagen tiene " << img.rows << " pixeles de alto x "
          << img.cols << " pixeles de ancho" << endl;
 
+    // Inicio Correción tamaño (si necesita)
     int nuevoNcolumnas = 0;
 
     if (img.rows == 720)
@@ -336,10 +353,11 @@ int main(int argc, char **argv)
     {
         cout << "Resolución no permitida" << endl;
     }
+    // Fin Correción tamaño (si necesita)
 
     cout << "La imagen tiene " << img.rows << " pixeles de alto x " << img.cols << " pixeles de ancho" << endl;
 
-    //Comienzo creación de matrices
+    // Comienzo creación de matrices
     const int rows = img.rows;
     const int cols = img.cols;
 
@@ -383,14 +401,58 @@ int main(int argc, char **argv)
     for (size_t i = 0; i < outRows; ++i)
         outB[i] = new int[outCols];
 
-    //Fin creación de matrices
+    // Fin creación de matrices
 
     //Inicio Conversión**********************************
     int numeroFilasImg = 0;
     int numeroColumnasImg = 0;
+
     if (rows == 720)
     {
-        //reducirUnPixel(imgR, imgG, imgB, outR, outG, outB);
+        numeroFilasImg = 240; // 720/3
+        numeroColumnasImg = cols / 3;
+
+        for (int i = 0; i < numeroFilasImg; i++)
+        {
+            for (int j = 0; j < numeroColumnasImg; j++)
+            {
+                int R3x3[3][3];
+                int G3x3[3][3];
+                int B3x3[3][3];
+
+                int indexFilaActual = (i * 3);
+                int indexColumnaActual = (j * 3);
+
+                for (int k = 0; k < 3; k++)
+                {
+                    for (int l = 0; l < 3; l++)
+                    {
+                        R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                    }
+                }
+
+                int R2x2[2][2];
+                int G2x2[2][2];
+                int B2x2[2][2];
+
+                reducirMatriz3x3a2x2(R3x3, G3x3, B3x3, R2x2, G2x2, B2x2);
+
+                int indexFilaActualOUT = (i * 2);
+                int indexColumnaActualOUT = (j * 2);
+
+                for (int k = 0; k < 2; k++)
+                {
+                    for (int l = 0; l < 2; l++)
+                    {
+                        outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
+                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
+                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                    }
+                }
+            }
+        }
     }
     else if (rows == 1080)
     {
@@ -530,6 +592,8 @@ int main(int argc, char **argv)
     delete outB;
 
     //Fin Borrar matrices
+
+    // Imprimir Imagen original y convertida
     imshow("Imagen Entrada", img);
     imshow("Imagen Salida", imgOut);
     waitKey(0);

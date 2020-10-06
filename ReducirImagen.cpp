@@ -1,7 +1,40 @@
 #include <opencv2/opencv.hpp>
+#include <math.h>
 
 using namespace std;
 using namespace cv;
+
+/* const int rows = 600;
+const int cols = 797;
+const int outRows = 599;
+const int outCols = 796; */
+const int rows = 410;
+const int cols = 410;
+const int outRows = 409;
+const int outCols = 409;
+
+void reducirUnPixel(int imgR[rows][cols], int imgG[rows][cols], int imgB[rows][cols], 
+                    int outR[outRows][outCols], int outG[outRows][outCols], int outB[outRows][outCols]){
+    double R[rows][cols];
+    double G[rows][cols];
+    double B[rows][cols];
+
+    for (int i=0; i < rows; i++){
+        for ( int j=0; j < outCols; j++){
+            R[i][j] = (double)((imgR[i][j] + imgR[i][j+1])/2);
+            G[i][j] = (double)((imgG[i][j] + imgG[i][j+1])/2);
+            B[i][j] = (double)((imgB[i][j] + imgB[i][j+1])/2);
+        }
+    }
+
+    for (int i=0; i < outRows; i++){
+        for (int j=0; j < outCols; j++){
+            outR[i][j] = ceil((double)((R[i][j] + R[i+1][j])/2));
+            outG[i][j] = ceil((double)((G[i][j] + G[i+1][j])/2));
+            outB[i][j] = ceil((double)((B[i][j] + B[i+1][j])/2));
+        }
+    }
+}
 
 int main(int argc, char** argv )
 {
@@ -10,7 +43,7 @@ int main(int argc, char** argv )
 
     // Output image
     // Mat imgOut = img.clone();
-    Mat imgOut(480,480,CV_8UC3);
+    Mat imgOut(outRows,outCols,CV_8UC3);
 
     
     cout << "La imagen tiene " << img.rows << " pixeles de alto x "
@@ -46,15 +79,35 @@ int main(int argc, char** argv )
         imgOut.at<cv::Vec3b>(242,i)[2] = 255;
     }*/
 
-    for (int i = 0; i < imgOut.rows; i++)
-    {
-        for (int j = 0; j < imgOut.cols; j++)
-        {
-            imgOut.at<cv::Vec3b>(i,j)[0] = img.at<cv::Vec3b>(i,j)[0];
-            imgOut.at<cv::Vec3b>(i,j)[1] = img.at<cv::Vec3b>(i,j)[1];
-            imgOut.at<cv::Vec3b>(i,j)[2] = img.at<cv::Vec3b>(i,j)[2];
+    
+    int imgR[rows][cols];
+    int imgG[rows][cols];
+    int imgB[rows][cols];
+    int outR[outRows][outCols];
+    int outG[outRows][outCols];
+    int outB[outRows][outCols];
+
+    for (int i=0; i < rows; i++){
+        for (int j=0; j < cols; j++){
+            imgR[i][j] = img.at<cv::Vec3b>(i,j)[2];
+            imgG[i][j] = img.at<cv::Vec3b>(i,j)[1];
+            imgB[i][j] = img.at<cv::Vec3b>(i,j)[0];
         }
     }
+
+    reducirUnPixel(imgR, imgG, imgB, outR, outG, outB);
+
+
+
+    for (int i = 0; i < outRows; i++)
+    {
+        for (int j = 0; j < outCols; j++)
+        {
+            imgOut.at<cv::Vec3b>(i,j)[0] = outB[i][j];
+            imgOut.at<cv::Vec3b>(i,j)[1] = outG[i][j];
+            imgOut.at<cv::Vec3b>(i,j)[2] = outR[i][j];
+        }
+    } 
 
     imshow("Imagen Entrada", img);
     imshow("Imagen Salida", imgOut);

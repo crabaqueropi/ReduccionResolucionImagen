@@ -266,6 +266,38 @@ Mat cambiarTamanoImagen(Mat img, int row, int nuevoNcolumnas)
     return imgAux;
 }
 
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[4][4], int outG[4][4], int outB[4][4])
+{
+    for (int k = 0; k < 4; k++)
+    {
+        for (int l = 0; l < 4; l++)
+        {
+            outR[k][l] = imgR[k][l];
+            outG[k][l] = imgG[k][l];
+            outB[k][l] = imgB[k][l];
+        }
+    }
+}
+
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
+void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[2][2], int outG[2][2], int outB[2][2])
+{
+    for (int k = 0; k < 2; k++)
+    {
+        for (int l = 0; l < 2; l++)
+        {
+            outR[k][l] = imgR[k][l];
+            outG[k][l] = imgG[k][l];
+            outB[k][l] = imgB[k][l];
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     // Read image
@@ -354,15 +386,105 @@ int main(int argc, char **argv)
     //Fin creación de matrices
 
     //Inicio Conversión**********************************
+    int numeroFilasImg = 0;
+    int numeroColumnasImg = 0;
     if (rows == 720)
     {
         //reducirUnPixel(imgR, imgG, imgB, outR, outG, outB);
     }
     else if (rows == 1080)
     {
+        numeroFilasImg = 120; // 1080/9
+        numeroColumnasImg = cols / 9;
+
+        for (int i = 0; i < numeroFilasImg; i++)
+        {
+            for (int j = 0; j < numeroColumnasImg; j++)
+            {
+                int R9x9[9][9];
+                int G9x9[9][9];
+                int B9x9[9][9];
+
+                int indexFilaActual = (i * 9);
+                int indexColumnaActual = (j * 9);
+
+                for (int k = 0; k < 9; k++)
+                {
+                    for (int l = 0; l < 9; l++)
+                    {
+                        R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                    }
+                }
+
+                int R4x4[4][4];
+                int G4x4[4][4];
+                int B4x4[4][4];
+
+                reducirMatriz9x9a4x4(R9x9, G9x9, B9x9, R4x4, G4x4, B4x4);
+
+                int indexFilaActualOUT = (i * 4);
+                int indexColumnaActualOUT = (j * 4);
+
+                for (int k = 0; k < 4; k++)
+                {
+                    for (int l = 0; l < 4; l++)
+                    {
+                        outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R4x4[k][l];
+                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G4x4[k][l];
+                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B4x4[k][l];
+                    }
+                }
+            }
+        }
     }
     else if (rows == 2160)
     {
+        numeroFilasImg = 240; // 2160/9
+        numeroColumnasImg = cols / 9;
+
+        for (int i = 0; i < numeroFilasImg; i++)
+        {
+            for (int j = 0; j < numeroColumnasImg; j++)
+            {
+                int R9x9[9][9];
+                int G9x9[9][9];
+                int B9x9[9][9];
+
+                int indexFilaActual = (i * 9);
+                int indexColumnaActual = (j * 9);
+
+                for (int k = 0; k < 9; k++)
+                {
+                    for (int l = 0; l < 9; l++)
+                    {
+                        R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                    }
+                }
+
+                int R2x2[2][2];
+                int G2x2[2][2];
+                int B2x2[2][2];
+
+                reducirMatriz9x9a2x2(R9x9, G9x9, B9x9, R2x2, G2x2, B2x2);
+
+                int indexFilaActualOUT = (i * 2);
+                int indexColumnaActualOUT = (j * 2);
+
+                for (int k = 0; k < 2; k++)
+                {
+                    for (int l = 0; l < 2; l++)
+                    {
+                        outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
+                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
+                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                    }
+                }
+            }
+        }
     }
     else
     {

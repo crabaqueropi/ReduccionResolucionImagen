@@ -271,13 +271,27 @@ Mat cambiarTamanoImagen(Mat img, int row, int nuevoNcolumnas)
 //CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int outR[2][2], int outG[2][2], int outB[2][2])
 {
+    double R[3][2];
+    double G[3][2];
+    double B[3][2];
+
+    for (int k = 0; k < 3; k++)
+    {
+        for (int l = 0; l < 2; l++)
+        {
+            R[k][l] = (double)((imgR[k][l] + imgR[k][l+1])/2);
+            G[k][l] = (double)((imgG[k][l] + imgG[k][l+1])/2);
+            B[k][l] = (double)((imgB[k][l] + imgB[k][l+1])/2);
+        }
+    }
+
     for (int k = 0; k < 2; k++)
     {
         for (int l = 0; l < 2; l++)
         {
-            outR[k][l] = imgR[k][l];
-            outG[k][l] = imgG[k][l];
-            outB[k][l] = imgB[k][l];
+            outR[k][l] = ceil((double)((R[k][l] + R[k+1][l])/2));
+            outG[k][l] = ceil((double)((G[k][l] + G[k+1][l])/2));
+            outB[k][l] = ceil((double)((B[k][l] + B[k+1][l])/2));
         }
     }
 }
@@ -287,15 +301,35 @@ void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int ou
 //CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[4][4], int outG[4][4], int outB[4][4])
 {
-    for (int k = 0; k < 4; k++)
+    double R[9][9];
+    double G[9][9];
+    double B[9][9];
+
+    int R8x8[8][8];
+    int G8x8[8][8];
+    int B8x8[8][8];
+
+    for (int k = 0; k < 9; k++)
     {
-        for (int l = 0; l < 4; l++)
+        for (int l = 0; l < 8; l++)
         {
-            outR[k][l] = imgR[k][l];
-            outG[k][l] = imgG[k][l];
-            outB[k][l] = imgB[k][l];
+            R[k][l] = (double)((imgR[k][l] + imgR[k][l+1])/2);
+            G[k][l] = (double)((imgG[k][l] + imgG[k][l+1])/2);
+            B[k][l] = (double)((imgB[k][l] + imgB[k][l+1])/2);
         }
     }
+
+    for (int k = 0; k < 8; k++)
+    {
+        for (int l = 0; l < 8; l++)
+        {
+            R8x8[k][l] = ceil((double)((R[k][l] + R[k+1][l])/2));
+            G8x8[k][l] = ceil((double)((G[k][l] + G[k+1][l])/2));
+            B8x8[k][l] = ceil((double)((B[k][l] + B[k+1][l])/2));
+        }
+    }
+
+    algoritmo2Para1080p(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
 //CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
@@ -303,21 +337,41 @@ void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
 //CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[2][2], int outG[2][2], int outB[2][2])
 {
-    for (int k = 0; k < 2; k++)
+    double R[9][9];
+    double G[9][9];
+    double B[9][9];
+
+    int R8x8[8][8];
+    int G8x8[8][8];
+    int B8x8[8][8];
+
+    for (int k = 0; k < 9; k++)
     {
-        for (int l = 0; l < 2; l++)
+        for (int l = 0; l < 8; l++)
         {
-            outR[k][l] = imgR[k][l];
-            outG[k][l] = imgG[k][l];
-            outB[k][l] = imgB[k][l];
+            R[k][l] = (double)((imgR[k][l] + imgR[k][l+1])/2);
+            G[k][l] = (double)((imgG[k][l] + imgG[k][l+1])/2);
+            B[k][l] = (double)((imgB[k][l] + imgB[k][l+1])/2);
         }
     }
+
+    for (int k = 0; k < 8; k++)
+    {
+        for (int l = 0; l < 8; l++)
+        {
+            R8x8[k][l] = ceil((double)((R[k][l] + R[k+1][l])/2));
+            G8x8[k][l] = ceil((double)((G[k][l] + G[k+1][l])/2));
+            B8x8[k][l] = ceil((double)((B[k][l] + B[k+1][l])/2));
+        }
+    }
+
+    algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
 int main(int argc, char **argv)
 {
     // Leer imágen
-    Mat img = imread("imagen720p.jpg", CV_LOAD_IMAGE_COLOR);
+    Mat img = imread("imagen4k.jpg", CV_LOAD_IMAGE_COLOR);
 
     cout << "La imagen tiene " << img.rows << " pixeles de alto x "
          << img.cols << " pixeles de ancho" << endl;

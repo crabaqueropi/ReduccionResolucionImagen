@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-#define THREADS 16
+#define THREADS 8
 
 int **outR;
 int **outG;
@@ -282,9 +282,6 @@ Mat cambiarTamanoImagen(Mat img, int row, int nuevoNcolumnas)
     return imgAux;
 }
 
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int outR[2][2], int outG[2][2], int outB[2][2])
 {
     double R[3][2];
@@ -312,9 +309,6 @@ void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int ou
     }
 }
 
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[4][4], int outG[4][4], int outB[4][4])
 {
     double R[9][9];
@@ -348,9 +342,6 @@ void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para1080p(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
-//CAMBIAR POR COMPLETO LA SIGUIENTE FUNCIÓN************************************************
 void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[2][2], int outG[2][2], int outB[2][2])
 {
     double R[9][9];
@@ -388,10 +379,9 @@ void *reduccion720(void *args)
 {
     int filaInicial, filaFinal, threadId = *(int *)args;
 
-    filaInicial = (240 / THREADS) * threadId;
-    filaFinal = filaInicial + ((240 / THREADS) - 1);
-
     int numeroFilasImg = 240; // 720/3
+    filaInicial = (numeroFilasImg / THREADS) * threadId;
+    filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
 
     for (int i = filaInicial; i <= filaFinal; i++)
     {
@@ -440,12 +430,12 @@ void *reduccion1080(void *args)
 {
     int filaInicial, filaFinal, threadId = *(int *)args;
 
-    filaInicial = (120 / THREADS) * threadId;
-    filaFinal = filaInicial + ((120 / THREADS) - 1);
-
     int numeroFilasImg = 120; // 1080/9
 
-    for (int i = 0; i < numeroFilasImg; i++)
+    filaInicial = (numeroFilasImg / THREADS) * threadId;
+    filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
+
+    for (int i = filaInicial; i <= filaFinal; i++)
     {
         for (int j = 0; j < numeroColumnasImg; j++)
         {
@@ -485,19 +475,18 @@ void *reduccion1080(void *args)
                 }
             }
         }
-    }
+    }    
 }
 
 void *reduccion4k(void *args)
 {
     int filaInicial, filaFinal, threadId = *(int *)args;
 
-    filaInicial = (240 / THREADS) * threadId;
-    filaFinal = filaInicial + ((240 / THREADS) - 1);
-
     int numeroFilasImg = 240; // 2160/9
+    filaInicial = (numeroFilasImg / THREADS) * threadId;
+    filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
 
-    for (int i = 0; i < numeroFilasImg; i++)
+    for (int i = filaInicial; i <= filaFinal; i++)
     {
         for (int j = 0; j < numeroColumnasImg; j++)
         {
@@ -581,7 +570,7 @@ int main(int argc, char **argv)
     }
     // Fin Correción tamaño (si necesita)
 
-    cout << "La imagen tiene " << img.rows << " pixeles de alto x " << img.cols << " pixeles de ancho" << endl;
+    // cout << "La imagen tiene " << img.rows << " pixeles de alto x " << img.cols << " pixeles de ancho" << endl;
 
     // Comienzo creación de matrices
     const int rows = img.rows;
@@ -632,97 +621,62 @@ int main(int argc, char **argv)
     //Inicio Conversión**********************************
     int numeroFilasImg = 0;
 
+    //  Creación hilos y empezar toma de tiempo
+    int threadId[THREADS], i, *retval;
+    pthread_t thread[THREADS];
+
+    struct timeval tval_before, tval_after, tval_result;
+    gettimeofday(&tval_before, NULL);
+    //  **************
+
     if (rows == 720)
     {
-
         numeroColumnasImg = cols / 3;
-        //ACA SE CREAN LOS HILOS
-        int threadId[THREADS], i, *retval;
-        pthread_t thread[THREADS];
-
-        struct timeval tval_before, tval_after, tval_result;
-        gettimeofday(&tval_before, NULL);
 
         for (i = 0; i < THREADS; i++)
         {
             threadId[i] = i;
             pthread_create(&thread[i], NULL, reduccion720, &threadId[i]);
         }
-
-        for (i = 0; i < THREADS; i++)
-        {
-            pthread_join(thread[i], (void **)&retval);
-        }
-
-        gettimeofday(&tval_after, NULL);
-
-        timersub(&tval_after, &tval_before, &tval_result);
-
-        printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
     }
     else if (rows == 1080)
     {
 
         numeroColumnasImg = cols / 9;
 
-        //ACA SE CREAN LOS HILOS
-        int threadId[THREADS], i, *retval;
-        pthread_t thread[THREADS];
-
-        struct timeval tval_before, tval_after, tval_result;
-        gettimeofday(&tval_before, NULL);
-
         for (i = 0; i < THREADS; i++)
         {
             threadId[i] = i;
             pthread_create(&thread[i], NULL, reduccion1080, &threadId[i]);
         }
-
-        for (i = 0; i < THREADS; i++)
-        {
-            pthread_join(thread[i], (void **)&retval);
-        }
-
-        gettimeofday(&tval_after, NULL);
-
-        timersub(&tval_after, &tval_before, &tval_result);
-
-        printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
     }
     else if (rows == 2160)
     {
 
         numeroColumnasImg = cols / 9;
 
-        //ACA SE CREAN LOS HILOS
-        int threadId[THREADS], i, *retval;
-        pthread_t thread[THREADS];
-
-        struct timeval tval_before, tval_after, tval_result;
-        gettimeofday(&tval_before, NULL);
-
         for (i = 0; i < THREADS; i++)
         {
             threadId[i] = i;
             pthread_create(&thread[i], NULL, reduccion4k, &threadId[i]);
         }
-
-        for (i = 0; i < THREADS; i++)
-        {
-            pthread_join(thread[i], (void **)&retval);
-        }
-
-        gettimeofday(&tval_after, NULL);
-
-        timersub(&tval_after, &tval_before, &tval_result);
-
-        printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
     }
     else
     {
         cout << "Resolución no permitida" << endl;
     }
     //Fin Conversión*******************
+
+    //Recolección Hilos y finalización toma de tiempo
+    for (i = 0; i < THREADS; i++)
+    {
+        pthread_join(thread[i], (void **)&retval);
+    }
+
+    gettimeofday(&tval_after, NULL);
+    timersub(&tval_after, &tval_before, &tval_result);
+    printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+    //Fin Recolección Hilos y finalización toma de tiempo*****
 
     //Pasar matrices resultantes a Imagen de salida
     for (int i = 0; i < outRows; i++)

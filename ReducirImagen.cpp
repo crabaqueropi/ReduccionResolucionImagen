@@ -1,7 +1,23 @@
 #include <opencv2/opencv.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <omp.h>
+#include <sys/time.h>
 
 using namespace std;
 using namespace cv;
+
+#define THREADS 16
+
+int **outR;
+int **outG;
+int **outB;
+int **imgR;
+int **imgG;
+int **imgB;
+int numeroColumnasImg = 0;
 
 void matriz4x4Amatriz2x2(int imgR[4][4], int imgG[4][4], int imgB[4][4], int outR[2][2], int outG[2][2], int outB[2][2])
 { // recibo una matríz cuadrada con numero par de filas (nxn)
@@ -279,9 +295,9 @@ void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int ou
     {
         for (int l = 0; l < 2; l++)
         {
-            R[k][l] = (double)((imgR[k][l] + imgR[k][l+1])/2);
-            G[k][l] = (double)((imgG[k][l] + imgG[k][l+1])/2);
-            B[k][l] = (double)((imgB[k][l] + imgB[k][l+1])/2);
+            R[k][l] = (double)((imgR[k][l] + imgR[k][l + 1]) / 2);
+            G[k][l] = (double)((imgG[k][l] + imgG[k][l + 1]) / 2);
+            B[k][l] = (double)((imgB[k][l] + imgB[k][l + 1]) / 2);
         }
     }
 
@@ -289,9 +305,9 @@ void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int ou
     {
         for (int l = 0; l < 2; l++)
         {
-            outR[k][l] = ceil((double)((R[k][l] + R[k+1][l])/2));
-            outG[k][l] = ceil((double)((G[k][l] + G[k+1][l])/2));
-            outB[k][l] = ceil((double)((B[k][l] + B[k+1][l])/2));
+            outR[k][l] = ceil((double)((R[k][l] + R[k + 1][l]) / 2));
+            outG[k][l] = ceil((double)((G[k][l] + G[k + 1][l]) / 2));
+            outB[k][l] = ceil((double)((B[k][l] + B[k + 1][l]) / 2));
         }
     }
 }
@@ -313,9 +329,9 @@ void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     {
         for (int l = 0; l < 8; l++)
         {
-            R[k][l] = (double)((imgR[k][l] + imgR[k][l+1])/2);
-            G[k][l] = (double)((imgG[k][l] + imgG[k][l+1])/2);
-            B[k][l] = (double)((imgB[k][l] + imgB[k][l+1])/2);
+            R[k][l] = (double)((imgR[k][l] + imgR[k][l + 1]) / 2);
+            G[k][l] = (double)((imgG[k][l] + imgG[k][l + 1]) / 2);
+            B[k][l] = (double)((imgB[k][l] + imgB[k][l + 1]) / 2);
         }
     }
 
@@ -323,9 +339,9 @@ void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     {
         for (int l = 0; l < 8; l++)
         {
-            R8x8[k][l] = ceil((double)((R[k][l] + R[k+1][l])/2));
-            G8x8[k][l] = ceil((double)((G[k][l] + G[k+1][l])/2));
-            B8x8[k][l] = ceil((double)((B[k][l] + B[k+1][l])/2));
+            R8x8[k][l] = ceil((double)((R[k][l] + R[k + 1][l]) / 2));
+            G8x8[k][l] = ceil((double)((G[k][l] + G[k + 1][l]) / 2));
+            B8x8[k][l] = ceil((double)((B[k][l] + B[k + 1][l]) / 2));
         }
     }
 
@@ -349,9 +365,9 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     {
         for (int l = 0; l < 8; l++)
         {
-            R[k][l] = (double)((imgR[k][l] + imgR[k][l+1])/2);
-            G[k][l] = (double)((imgG[k][l] + imgG[k][l+1])/2);
-            B[k][l] = (double)((imgB[k][l] + imgB[k][l+1])/2);
+            R[k][l] = (double)((imgR[k][l] + imgR[k][l + 1]) / 2);
+            G[k][l] = (double)((imgG[k][l] + imgG[k][l + 1]) / 2);
+            B[k][l] = (double)((imgB[k][l] + imgB[k][l + 1]) / 2);
         }
     }
 
@@ -359,19 +375,71 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     {
         for (int l = 0; l < 8; l++)
         {
-            R8x8[k][l] = ceil((double)((R[k][l] + R[k+1][l])/2));
-            G8x8[k][l] = ceil((double)((G[k][l] + G[k+1][l])/2));
-            B8x8[k][l] = ceil((double)((B[k][l] + B[k+1][l])/2));
+            R8x8[k][l] = ceil((double)((R[k][l] + R[k + 1][l]) / 2));
+            G8x8[k][l] = ceil((double)((G[k][l] + G[k + 1][l]) / 2));
+            B8x8[k][l] = ceil((double)((B[k][l] + B[k + 1][l]) / 2));
         }
     }
 
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
+void *reduccion720(void *args)
+{
+    int filaInicial, filaFinal, threadId = *(int *)args;
+
+    filaInicial = (240 / THREADS) * threadId;
+    filaFinal = filaInicial + ((240 / THREADS) - 1);
+
+    int numeroFilasImg = 240; // 720/3
+
+    for (int i = filaInicial; i <= filaFinal; i++)
+    {
+        for (int j = 0; j < numeroColumnasImg; j++)
+        {
+            int R3x3[3][3];
+            int G3x3[3][3];
+            int B3x3[3][3];
+
+            int indexFilaActual = (i * 3);
+            int indexColumnaActual = (j * 3);
+
+            for (int k = 0; k < 3; k++)
+            {
+                for (int l = 0; l < 3; l++)
+                {
+                    R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                    G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                    B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                }
+            }
+
+            int R2x2[2][2];
+            int G2x2[2][2];
+            int B2x2[2][2];
+
+            reducirMatriz3x3a2x2(R3x3, G3x3, B3x3, R2x2, G2x2, B2x2);
+
+            int indexFilaActualOUT = (i * 2);
+            int indexColumnaActualOUT = (j * 2);
+
+            for (int k = 0; k < 2; k++)
+            {
+                for (int l = 0; l < 2; l++)
+                {
+                    outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
+                    outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
+                    outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                }
+            }
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     // Leer imágen
-    Mat img = imread("imagen4k.jpg", CV_LOAD_IMAGE_COLOR);
+    Mat img = imread("imagen720p.jpg", CV_LOAD_IMAGE_COLOR);
 
     cout << "La imagen tiene " << img.rows << " pixeles de alto x "
          << img.cols << " pixeles de ancho" << endl;
@@ -415,15 +483,15 @@ int main(int argc, char **argv)
     const int rows = img.rows;
     const int cols = img.cols;
 
-    int **imgR = new int *[rows];
+    imgR = new int *[rows];
     for (size_t i = 0; i < rows; ++i)
         imgR[i] = new int[cols];
 
-    int **imgG = new int *[rows];
+    imgG = new int *[rows];
     for (size_t i = 0; i < rows; ++i)
         imgG[i] = new int[cols];
 
-    int **imgB = new int *[rows];
+    imgB = new int *[rows];
     for (size_t i = 0; i < rows; ++i)
         imgB[i] = new int[cols];
 
@@ -443,15 +511,15 @@ int main(int argc, char **argv)
     // Output image
     Mat imgOut(outRows, outCols, CV_8UC3);
 
-    int **outR = new int *[outRows];
+    outR = new int *[outRows];
     for (size_t i = 0; i < outRows; ++i)
         outR[i] = new int[outCols];
 
-    int **outG = new int *[outRows];
+    outG = new int *[outRows];
     for (size_t i = 0; i < outRows; ++i)
         outG[i] = new int[outCols];
 
-    int **outB = new int *[outRows];
+    outB = new int *[outRows];
     for (size_t i = 0; i < outRows; ++i)
         outB[i] = new int[outCols];
 
@@ -459,54 +527,34 @@ int main(int argc, char **argv)
 
     //Inicio Conversión**********************************
     int numeroFilasImg = 0;
-    int numeroColumnasImg = 0;
 
     if (rows == 720)
     {
-        numeroFilasImg = 240; // 720/3
+
         numeroColumnasImg = cols / 3;
+        //ACA SE CREAN LOS HILOS
+        int threadId[THREADS], i, *retval;
+        pthread_t thread[THREADS];
 
-        for (int i = 0; i < numeroFilasImg; i++)
+        struct timeval tval_before, tval_after, tval_result;
+        gettimeofday(&tval_before, NULL);
+
+        for (i = 0; i < THREADS; i++)
         {
-            for (int j = 0; j < numeroColumnasImg; j++)
-            {
-                int R3x3[3][3];
-                int G3x3[3][3];
-                int B3x3[3][3];
-
-                int indexFilaActual = (i * 3);
-                int indexColumnaActual = (j * 3);
-
-                for (int k = 0; k < 3; k++)
-                {
-                    for (int l = 0; l < 3; l++)
-                    {
-                        R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
-                        G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
-                        B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
-                    }
-                }
-
-                int R2x2[2][2];
-                int G2x2[2][2];
-                int B2x2[2][2];
-
-                reducirMatriz3x3a2x2(R3x3, G3x3, B3x3, R2x2, G2x2, B2x2);
-
-                int indexFilaActualOUT = (i * 2);
-                int indexColumnaActualOUT = (j * 2);
-
-                for (int k = 0; k < 2; k++)
-                {
-                    for (int l = 0; l < 2; l++)
-                    {
-                        outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
-                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
-                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
-                    }
-                }
-            }
+            threadId[i] = i;
+            pthread_create(&thread[i], NULL, reduccion720, &threadId[i]);
         }
+
+        for (i = 0; i < THREADS; i++)
+        {
+            pthread_join(thread[i], (void **)&retval);
+        }
+
+        gettimeofday(&tval_after, NULL);
+
+        timersub(&tval_after, &tval_before, &tval_result);
+
+        printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
     }
     else if (rows == 1080)
     {

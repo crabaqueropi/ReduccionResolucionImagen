@@ -436,10 +436,114 @@ void *reduccion720(void *args)
     }
 }
 
+void *reduccion1080(void *args)
+{
+    int filaInicial, filaFinal, threadId = *(int *)args;
+
+    filaInicial = (120 / THREADS) * threadId;
+    filaFinal = filaInicial + ((120 / THREADS) - 1);
+
+    int numeroFilasImg = 120; // 1080/9
+
+    for (int i = 0; i < numeroFilasImg; i++)
+    {
+        for (int j = 0; j < numeroColumnasImg; j++)
+        {
+            int R9x9[9][9];
+            int G9x9[9][9];
+            int B9x9[9][9];
+
+            int indexFilaActual = (i * 9);
+            int indexColumnaActual = (j * 9);
+
+            for (int k = 0; k < 9; k++)
+            {
+                for (int l = 0; l < 9; l++)
+                {
+                    R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                    G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                    B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                }
+            }
+
+            int R4x4[4][4];
+            int G4x4[4][4];
+            int B4x4[4][4];
+
+            reducirMatriz9x9a4x4(R9x9, G9x9, B9x9, R4x4, G4x4, B4x4);
+
+            int indexFilaActualOUT = (i * 4);
+            int indexColumnaActualOUT = (j * 4);
+
+            for (int k = 0; k < 4; k++)
+            {
+                for (int l = 0; l < 4; l++)
+                {
+                    outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R4x4[k][l];
+                    outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G4x4[k][l];
+                    outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B4x4[k][l];
+                }
+            }
+        }
+    }
+}
+
+void *reduccion4k(void *args)
+{
+    int filaInicial, filaFinal, threadId = *(int *)args;
+
+    filaInicial = (240 / THREADS) * threadId;
+    filaFinal = filaInicial + ((240 / THREADS) - 1);
+
+    int numeroFilasImg = 240; // 2160/9
+
+    for (int i = 0; i < numeroFilasImg; i++)
+    {
+        for (int j = 0; j < numeroColumnasImg; j++)
+        {
+            int R9x9[9][9];
+            int G9x9[9][9];
+            int B9x9[9][9];
+
+            int indexFilaActual = (i * 9);
+            int indexColumnaActual = (j * 9);
+
+            for (int k = 0; k < 9; k++)
+            {
+                for (int l = 0; l < 9; l++)
+                {
+                    R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                    G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                    B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                }
+            }
+
+            int R2x2[2][2];
+            int G2x2[2][2];
+            int B2x2[2][2];
+
+            reducirMatriz9x9a2x2(R9x9, G9x9, B9x9, R2x2, G2x2, B2x2);
+
+            int indexFilaActualOUT = (i * 2);
+            int indexColumnaActualOUT = (j * 2);
+
+            for (int k = 0; k < 2; k++)
+            {
+                for (int l = 0; l < 2; l++)
+                {
+                    outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
+                    outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
+                    outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                }
+            }
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     // Leer imágen
-    Mat img = imread("imagen720p.jpg", CV_LOAD_IMAGE_COLOR);
+    Mat img = imread("imagen4k.jpg", CV_LOAD_IMAGE_COLOR);
 
     cout << "La imagen tiene " << img.rows << " pixeles de alto x "
          << img.cols << " pixeles de ancho" << endl;
@@ -558,97 +662,61 @@ int main(int argc, char **argv)
     }
     else if (rows == 1080)
     {
-        numeroFilasImg = 120; // 1080/9
+
         numeroColumnasImg = cols / 9;
 
-        for (int i = 0; i < numeroFilasImg; i++)
+        //ACA SE CREAN LOS HILOS
+        int threadId[THREADS], i, *retval;
+        pthread_t thread[THREADS];
+
+        struct timeval tval_before, tval_after, tval_result;
+        gettimeofday(&tval_before, NULL);
+
+        for (i = 0; i < THREADS; i++)
         {
-            for (int j = 0; j < numeroColumnasImg; j++)
-            {
-                int R9x9[9][9];
-                int G9x9[9][9];
-                int B9x9[9][9];
-
-                int indexFilaActual = (i * 9);
-                int indexColumnaActual = (j * 9);
-
-                for (int k = 0; k < 9; k++)
-                {
-                    for (int l = 0; l < 9; l++)
-                    {
-                        R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
-                        G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
-                        B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
-                    }
-                }
-
-                int R4x4[4][4];
-                int G4x4[4][4];
-                int B4x4[4][4];
-
-                reducirMatriz9x9a4x4(R9x9, G9x9, B9x9, R4x4, G4x4, B4x4);
-
-                int indexFilaActualOUT = (i * 4);
-                int indexColumnaActualOUT = (j * 4);
-
-                for (int k = 0; k < 4; k++)
-                {
-                    for (int l = 0; l < 4; l++)
-                    {
-                        outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R4x4[k][l];
-                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G4x4[k][l];
-                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B4x4[k][l];
-                    }
-                }
-            }
+            threadId[i] = i;
+            pthread_create(&thread[i], NULL, reduccion1080, &threadId[i]);
         }
+
+        for (i = 0; i < THREADS; i++)
+        {
+            pthread_join(thread[i], (void **)&retval);
+        }
+
+        gettimeofday(&tval_after, NULL);
+
+        timersub(&tval_after, &tval_before, &tval_result);
+
+        printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
     }
     else if (rows == 2160)
     {
-        numeroFilasImg = 240; // 2160/9
+
         numeroColumnasImg = cols / 9;
 
-        for (int i = 0; i < numeroFilasImg; i++)
+        //ACA SE CREAN LOS HILOS
+        int threadId[THREADS], i, *retval;
+        pthread_t thread[THREADS];
+
+        struct timeval tval_before, tval_after, tval_result;
+        gettimeofday(&tval_before, NULL);
+
+        for (i = 0; i < THREADS; i++)
         {
-            for (int j = 0; j < numeroColumnasImg; j++)
-            {
-                int R9x9[9][9];
-                int G9x9[9][9];
-                int B9x9[9][9];
-
-                int indexFilaActual = (i * 9);
-                int indexColumnaActual = (j * 9);
-
-                for (int k = 0; k < 9; k++)
-                {
-                    for (int l = 0; l < 9; l++)
-                    {
-                        R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
-                        G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
-                        B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
-                    }
-                }
-
-                int R2x2[2][2];
-                int G2x2[2][2];
-                int B2x2[2][2];
-
-                reducirMatriz9x9a2x2(R9x9, G9x9, B9x9, R2x2, G2x2, B2x2);
-
-                int indexFilaActualOUT = (i * 2);
-                int indexColumnaActualOUT = (j * 2);
-
-                for (int k = 0; k < 2; k++)
-                {
-                    for (int l = 0; l < 2; l++)
-                    {
-                        outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
-                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
-                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
-                    }
-                }
-            }
+            threadId[i] = i;
+            pthread_create(&thread[i], NULL, reduccion4k, &threadId[i]);
         }
+
+        for (i = 0; i < THREADS; i++)
+        {
+            pthread_join(thread[i], (void **)&retval);
+        }
+
+        gettimeofday(&tval_after, NULL);
+
+        timersub(&tval_after, &tval_before, &tval_result);
+
+        printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
     }
     else
     {

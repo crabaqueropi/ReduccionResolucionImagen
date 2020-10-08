@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-#define THREADS 8
+int THREADS = 0;
 
 int **outR;
 int **outG;
@@ -475,7 +475,7 @@ void *reduccion1080(void *args)
                 }
             }
         }
-    }    
+    }
 }
 
 void *reduccion4k(void *args)
@@ -530,12 +530,15 @@ void *reduccion4k(void *args)
 }
 
 int main(int argc, char **argv)
-{
-    // Leer imágen
-    Mat img = imread("imagen4k.jpg", CV_LOAD_IMAGE_COLOR);
+{    
+    char* nombreEntrada = argv[1];
+    char* nombreSalida = argv[2];
+    THREADS = atoi(argv[3]);
 
-    cout << "La imagen tiene " << img.rows << " pixeles de alto x "
-         << img.cols << " pixeles de ancho" << endl;
+    // Leer imágen
+    Mat img = imread(nombreEntrada, CV_LOAD_IMAGE_COLOR);
+
+    //cout << "La imagen tiene " << img.rows << " pixeles de alto x "<< img.cols << " pixeles de ancho" << endl;
 
     // Inicio Correción tamaño (si necesita)
     int nuevoNcolumnas = 0;
@@ -718,8 +721,11 @@ int main(int argc, char **argv)
     //Fin Borrar matrices
 
     // Imprimir Imagen original y convertida
-    imshow("Imagen Entrada", img);
-    imshow("Imagen Salida", imgOut);
+    imshow(nombreEntrada, img);
+    imshow(nombreSalida, imgOut);
+
+    //Guarda imágen de salida en directorio local
+    imwrite(nombreSalida, imgOut);
     waitKey(0);
 
     return 1;

@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <omp.h>
 #include <sys/time.h>
+#include <fstream>
 
 using namespace std;
 using namespace cv;
@@ -535,6 +536,8 @@ int main(int argc, char **argv)
     char* nombreSalida = argv[2];
     THREADS = atoi(argv[3]);
 
+    //ofstream file;
+
     // Leer imágen
     Mat img = imread(nombreEntrada, CV_LOAD_IMAGE_COLOR);
 
@@ -678,7 +681,23 @@ int main(int argc, char **argv)
 
     gettimeofday(&tval_after, NULL);
     timersub(&tval_after, &tval_before, &tval_result);
-    printf("Time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+
+    if (rows == 720){
+        ofstream file;
+        file.open("/home/gutty/Paralela/ReduccionResolucionImagen/720.txt", ofstream::app);
+        file << THREADS << " HILOS: " << (long int)tval_result.tv_sec << "." << (long int)tval_result.tv_usec << endl;
+        file.close();
+    }else if (rows == 1080){
+        ofstream file;
+        file.open("/home/gutty/Paralela/ReduccionResolucionImagen/1080.txt", ofstream::app);
+        file << THREADS << " HILOS: " << (long int)tval_result.tv_sec << "." << (long int)tval_result.tv_usec << endl;
+        file.close();
+    }else{
+        ofstream file;
+        file.open("/home/gutty/Paralela/ReduccionResolucionImagen/4k.txt", ofstream::app);
+        file << THREADS << " HILOS: " << (long int)tval_result.tv_sec << "." << (long int)tval_result.tv_usec << endl;
+        file.close();
+    }
     //Fin Recolección Hilos y finalización toma de tiempo*****
 
     //Pasar matrices resultantes a Imagen de salida
@@ -720,9 +739,9 @@ int main(int argc, char **argv)
 
     //Fin Borrar matrices
 
-    // Imprimir Imagen original y convertida
-    imshow(nombreEntrada, img);
-    imshow(nombreSalida, imgOut);
+    // Imprimir Imagen original y convertida. DESCOMENTAR LAS SIGUIENTES LINEAS SI SE QUIEREN VER LAS IMAGENES DE ENTRADA Y SALIDA RESPECTIVAMENTE
+    //imshow(nombreEntrada, img);
+    //imshow(nombreSalida, imgOut);
 
     //Guarda imágen de salida en directorio local
     imwrite(nombreSalida, imgOut);

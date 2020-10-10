@@ -1,0 +1,27 @@
+#! /bin/bash
+
+clear
+
+time ./program imagen720p.jpg  miImagen720p-480p.jpg 2
+
+time ./program imagen720p.jpg  miImagen720p-480p.jpg 4
+
+time ./program imagen720p.jpg  miImagen720p-480p.jpg 8
+
+time ./program imagen720p.jpg  miImagen720p-480p.jpg 16
+
+time ./program imagen1080p.jpg  miImagen1080p-480p.jpg 2
+
+time ./program imagen1080p.jpg  miImagen1080p-480p.jpg 4
+
+time ./program imagen1080p.jpg  miImagen1080p-480p.jpg 8
+
+time ./program imagen1080p.jpg  miImagen1080p-480p.jpg 16
+
+time ./program imagen4k.jpg  miImagen4k-480p.jpg 2
+
+time ./program imagen4k.jpg  miImagen4k-480p.jpg 4
+
+time ./program imagen4k.jpg  miImagen4k-480p.jpg 8
+
+time ./program imagen4k.jpg  miImagen4k-480p.jpg 16

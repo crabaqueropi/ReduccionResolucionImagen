@@ -376,11 +376,12 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-void *reduccion720(void *args)
+void reduccion720(int threadId)
 {
-    int filaInicial, filaFinal, threadId = *(int *)args;
+    int filaInicial, filaFinal;
 
     int numeroFilasImg = 240; // 720/3
+
     filaInicial = (numeroFilasImg / THREADS) * threadId;
     filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
 
@@ -427,9 +428,9 @@ void *reduccion720(void *args)
     }
 }
 
-void *reduccion1080(void *args)
+void reduccion1080(int threadId)
 {
-    int filaInicial, filaFinal, threadId = *(int *)args;
+    int filaInicial, filaFinal;
 
     int numeroFilasImg = 120; // 1080/9
 
@@ -479,9 +480,9 @@ void *reduccion1080(void *args)
     }
 }
 
-void *reduccion4k(void *args)
+void reduccion4k(int threadId)
 {
-    int filaInicial, filaFinal, threadId = *(int *)args;
+    int filaInicial, filaFinal;
 
     int numeroFilasImg = 240; // 2160/9
     filaInicial = (numeroFilasImg / THREADS) * threadId;
@@ -531,9 +532,9 @@ void *reduccion4k(void *args)
 }
 
 int main(int argc, char **argv)
-{    
-    char* nombreEntrada = argv[1];
-    char* nombreSalida = argv[2];
+{
+    char *nombreEntrada = argv[1];
+    char *nombreSalida = argv[2];
     THREADS = atoi(argv[3]);
 
     //ofstream file;
@@ -627,10 +628,6 @@ int main(int argc, char **argv)
     //Inicio Conversión**********************************
     int numeroFilasImg = 0;
 
-    //  Creación hilos y empezar toma de tiempo
-    int threadId[THREADS], i, *retval;
-    pthread_t thread[THREADS];
-
     struct timeval tval_before, tval_after, tval_result;
     gettimeofday(&tval_before, NULL);
     //  **************
@@ -639,10 +636,10 @@ int main(int argc, char **argv)
     {
         numeroColumnasImg = cols / 3;
 
-        for (i = 0; i < THREADS; i++)
+        #pragma omp parallel num_threads(THREADS)
         {
-            threadId[i] = i;
-            pthread_create(&thread[i], NULL, reduccion720, &threadId[i]);
+            int ID = omp_get_thread_num();
+            reduccion720(ID);
         }
     }
     else if (rows == 1080)
@@ -650,10 +647,10 @@ int main(int argc, char **argv)
 
         numeroColumnasImg = cols / 9;
 
-        for (i = 0; i < THREADS; i++)
+        #pragma omp parallel num_threads(THREADS)
         {
-            threadId[i] = i;
-            pthread_create(&thread[i], NULL, reduccion1080, &threadId[i]);
+            int ID = omp_get_thread_num();
+            reduccion1080(ID);
         }
     }
     else if (rows == 2160)
@@ -661,10 +658,10 @@ int main(int argc, char **argv)
 
         numeroColumnasImg = cols / 9;
 
-        for (i = 0; i < THREADS; i++)
+        #pragma omp parallel num_threads(THREADS)
         {
-            threadId[i] = i;
-            pthread_create(&thread[i], NULL, reduccion4k, &threadId[i]);
+            int ID = omp_get_thread_num();
+            reduccion4k(ID);
         }
     }
     else
@@ -673,29 +670,28 @@ int main(int argc, char **argv)
     }
     //Fin Conversión*******************
 
-    //Recolección Hilos y finalización toma de tiempo
-    for (i = 0; i < THREADS; i++)
-    {
-        pthread_join(thread[i], (void **)&retval);
-    }
-
     gettimeofday(&tval_after, NULL);
     timersub(&tval_after, &tval_before, &tval_result);
 
-    if (rows == 720){
+    if (rows == 720)
+    {
         ofstream file;
         file.open("./720.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
+        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
         file.close();
-    }else if (rows == 1080){
+    }
+    else if (rows == 1080)
+    {
         ofstream file;
         file.open("./1080.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
+        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
         file.close();
-    }else{
+    }
+    else
+    {
         ofstream file;
         file.open("./4k.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
+        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
         file.close();
     }
     //Fin Recolección Hilos y finalización toma de tiempo*****

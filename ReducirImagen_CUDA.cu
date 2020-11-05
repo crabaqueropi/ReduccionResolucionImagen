@@ -7,7 +7,6 @@
 #include <sys/time.h>
 #include <fstream>
 #include <string> 
-#include "cuPrintf.cu"
 
 using namespace std;
 using namespace cv;

@@ -774,8 +774,8 @@ int main(int argc, char **argv)
     */
 
     //Pasar matrices resultantes a Imagen de salida
-    cout<<outRows<<endl;
-    cout<<outCols<<endl;
+    cout<<outB[0][0]<<endl;
+    cout<<outB[15][40]<<endl;
     for (int i = 0; i < outRows; i++)
     {
         cout<<"----------"<<endl;
@@ -783,8 +783,11 @@ int main(int argc, char **argv)
         {
             cout<<"******"<<endl;
             imgOut.at<cv::Vec3b>(i, j)[0] = outB[i][j];
+            cout<<"111111"<<endl;
             imgOut.at<cv::Vec3b>(i, j)[1] = outG[i][j];
+            cout<<"222222"<<endl;
             imgOut.at<cv::Vec3b>(i, j)[2] = outR[i][j];
+            cout<<"333333"<<endl;
         }
     }
     //Fin Pasar matrices resultantes a Imagen de salida

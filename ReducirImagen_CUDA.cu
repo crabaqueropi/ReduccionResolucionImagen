@@ -12,7 +12,7 @@ using namespace std;
 using namespace cv;
 
 int BLOCKSPERGRID  = 32;
-int NUMNUMTHREADS = 128;
+int NUMTHREADS = 128;
 
 int **outR;
 int **outG;
@@ -378,16 +378,16 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-__global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int **outG, int **outB, int *numeroColumnasImg)
+__global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int **outG, int **outB, int *numeroColumnasImg, int *NUMTHREADS)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    if (NUMNUMTHREADS<=240){
+    if (*NUMTHREADS<=240){
         int filaInicial, filaFinal; //, threadId = *(int *)args;
 
         int numeroFilasImg = 240; // 720/3
-        filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
-        filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
+        filaInicial = (numeroFilasImg / *NUMTHREADS) * threadId;
+        filaFinal = filaInicial + ((numeroFilasImg / *NUMTHREADS) - 1);
 
         for (int i = filaInicial; i <= filaFinal; i++)
         {
@@ -644,11 +644,14 @@ int main(int argc, char **argv)
     int **d_outR;
     int **d_outG;
     int **d_outB;
+    int *d_numeroColumnasImg;
+    int *d_NUMTHREADS;
     
 
     int sizeIn = sizeof(imgR); // Size sirve para todas las img
     int sizeOut = sizeof(outR); // Size sirve para todas las out
     int sizeNumeroColumnasImg = sizeof(numeroColumnasImg); 
+    int sizeNUMTHREADS = sizeof(NUMTHREADS); 
 
     // Alloc space for device copies of a, b, c
     cudaMalloc((void **)&d_imgR, sizeIn);
@@ -660,6 +663,7 @@ int main(int argc, char **argv)
     cudaMalloc((void **)&d_outB, sizeOut);
 
     cudaMalloc((void **)&d_numeroColumnasImg, sizeNumeroColumnasImg);
+    cudaMalloc((void **)&d_NUMTHREADS, sizeNUMTHREADS);
 
 
     numeroColumnasImg = cols / 3;
@@ -670,10 +674,11 @@ int main(int argc, char **argv)
     cudaMemcpy(d_imgG, imgG, sizeIn, cudaMemcpyHostToDevice);
     cudaMemcpy(d_imgB, imgB, sizeIn, cudaMemcpyHostToDevice);
     cudaMemcpy(d_numeroColumnasImg, numeroColumnasImg, sizeNumeroColumnasImg, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_NUMTHREADS, NUMTHREADS, sizeNUMTHREADS, cudaMemcpyHostToDevice);
 
-    int NUMTHREADSPerBlock = NUMNUMTHREADS/BLOCKSPERGRID;
+    int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
     // Launch add() kernel on GPU with N blocks
-    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg);
+    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS);
 
     // Copy result back to host
     cudaMemcpy(outR, d_outR, sizeOut, cudaMemcpyDeviceToHost);
@@ -681,7 +686,7 @@ int main(int argc, char **argv)
     cudaMemcpy(outB, d_outB, sizeOut, cudaMemcpyDeviceToHost);
 
     // Cleanup
-    cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg);
+    cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS);
 
 
     //************************** CUDA **********************************

@@ -285,7 +285,7 @@ Mat cambiarTamanoImagen(Mat img, int row, int nuevoNcolumnas)
     return imgAux;
 }
 
-__global__ void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int outR[2][2], int outG[2][2], int outB[2][2])
+__device__ void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int outR[2][2], int outG[2][2], int outB[2][2])
 {
     double R[3][2];
     double G[3][2];
@@ -673,8 +673,8 @@ int main(int argc, char **argv)
     cudaMemcpy(d_imgR, imgR, sizeIn, cudaMemcpyHostToDevice);
     cudaMemcpy(d_imgG, imgG, sizeIn, cudaMemcpyHostToDevice);
     cudaMemcpy(d_imgB, imgB, sizeIn, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_numeroColumnasImg, numeroColumnasImg, sizeNumeroColumnasImg, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_NUMTHREADS, NUMTHREADS, sizeNUMTHREADS, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeNumeroColumnasImg, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_NUMTHREADS, &NUMTHREADS, sizeNUMTHREADS, cudaMemcpyHostToDevice);
 
     int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
     // Launch add() kernel on GPU with N blocks

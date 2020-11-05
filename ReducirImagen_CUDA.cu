@@ -382,16 +382,19 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    if (NUMTHREADS<=240){
+    printf("oioioioi");
+    printf("%d\n",*NUMTHREADS);
+    
+    if (*NUMTHREADS<=240){
         int filaInicial, filaFinal; //, threadId = *(int *)args;
 
         int numeroFilasImg = 240; // 720/3
-        filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
-        filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
+        filaInicial = (numeroFilasImg / *NUMTHREADS) * threadId;
+        filaFinal = filaInicial + ((numeroFilasImg / *NUMTHREADS) - 1);
 
         for (int i = filaInicial; i <= filaFinal; i++)
         {
-            for (int j = 0; j < numeroColumnasImg; j++)
+            for (int j = 0; j < *numeroColumnasImg; j++)
             {
                 int R3x3[3][3];
                 int G3x3[3][3];

@@ -11,6 +11,9 @@
 using namespace std;
 using namespace cv;
 
+int BLOCKSPERGRID  = 32;
+int NUMTHREADS = 128;
+
 int THREADS = 0;
 
 int **outR;
@@ -377,54 +380,60 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-void *reduccion720(void *args)
+__global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int **outG, int **outB)
 {
-    int filaInicial, filaFinal, threadId = *(int *)args;
+    int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    int numeroFilasImg = 240; // 720/3
-    filaInicial = (numeroFilasImg / THREADS) * threadId;
-    filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
+    if (NUMTHREADS<=240){
+        int filaInicial, filaFinal; //, threadId = *(int *)args;
 
-    for (int i = filaInicial; i <= filaFinal; i++)
-    {
-        for (int j = 0; j < numeroColumnasImg; j++)
+        int numeroFilasImg = 240; // 720/3
+        filaInicial = (numeroFilasImg / THREADS) * threadId;
+        filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
+
+        for (int i = filaInicial; i <= filaFinal; i++)
         {
-            int R3x3[3][3];
-            int G3x3[3][3];
-            int B3x3[3][3];
-
-            int indexFilaActual = (i * 3);
-            int indexColumnaActual = (j * 3);
-
-            for (int k = 0; k < 3; k++)
+            for (int j = 0; j < numeroColumnasImg; j++)
             {
-                for (int l = 0; l < 3; l++)
+                int R3x3[3][3];
+                int G3x3[3][3];
+                int B3x3[3][3];
+
+                int indexFilaActual = (i * 3);
+                int indexColumnaActual = (j * 3);
+
+                for (int k = 0; k < 3; k++)
                 {
-                    R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
-                    G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
-                    B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                    for (int l = 0; l < 3; l++)
+                    {
+                        R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                    }
                 }
-            }
 
-            int R2x2[2][2];
-            int G2x2[2][2];
-            int B2x2[2][2];
+                int R2x2[2][2];
+                int G2x2[2][2];
+                int B2x2[2][2];
 
-            reducirMatriz3x3a2x2(R3x3, G3x3, B3x3, R2x2, G2x2, B2x2);
+                reducirMatriz3x3a2x2(R3x3, G3x3, B3x3, R2x2, G2x2, B2x2);
 
-            int indexFilaActualOUT = (i * 2);
-            int indexColumnaActualOUT = (j * 2);
+                int indexFilaActualOUT = (i * 2);
+                int indexColumnaActualOUT = (j * 2);
 
-            for (int k = 0; k < 2; k++)
-            {
-                for (int l = 0; l < 2; l++)
+                for (int k = 0; k < 2; k++)
                 {
-                    outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
-                    outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
-                    outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                    for (int l = 0; l < 2; l++)
+                    {
+                        outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
+                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
+                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                    }
                 }
             }
         }
+    }else{
+
     }
 }
 
@@ -537,8 +546,8 @@ int main(int argc, char **argv)
     char* nombreSalida = argv[2];
     THREADS = atoi(argv[3]); */
 
-    string nombreEntrada = "imagen4k.jpg";
-    string nombreSalida = "imagen4k-a480.jpg";
+    string nombreEntrada = "imagen720p.jpg";
+    string nombreSalida = "imagen720-a480CUDAAAAAAA.jpg";
     THREADS=2;
 
     //ofstream file;
@@ -629,6 +638,51 @@ int main(int argc, char **argv)
 
     // Fin creación de matrices
 
+    //************************** CUDA **********************************
+
+    int **d_imgR;
+    int **d_imgG;
+    int **d_imgB;
+    int **d_outR;
+    int **d_outG;
+    int **d_outB;
+    
+
+    int sizeIn = sizeof(imgR); // Size sirve para todas las img
+    int sizeOut = sizeof(outR); // Size sirve para todas las out
+
+    // Alloc space for device copies of a, b, c
+    cudaMalloc((void **)&d_imgR, sizeIn);
+    cudaMalloc((void **)&d_imgG, sizeIn);
+    cudaMalloc((void **)&d_imgB, sizeIn);
+
+    cudaMalloc((void **)&d_outR, sizeOut);
+    cudaMalloc((void **)&d_outG, sizeOut);
+    cudaMalloc((void **)&d_outB, sizeOut);
+
+    // Copy inputs to device
+    cudaMemcpy(d_imgR, imgR, sizeIn, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_imgG, imgG, sizeIn, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_imgB, imgB, sizeIn, cudaMemcpyHostToDevice);
+
+    int threadsPerBlock = NUMTHREADS/BLOCKSPERGRID;
+    // Launch add() kernel on GPU with N blocks
+    reduccion720<<<BLOCKSPERGRID, threadsPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB);
+
+    // Copy result back to host
+    cudaMemcpy(outR, d_outR, sizeOut, cudaMemcpyDeviceToHost);
+    cudaMemcpy(outG, d_outG, sizeOut, cudaMemcpyDeviceToHost);
+    cudaMemcpy(outB, d_outB, sizeOut, cudaMemcpyDeviceToHost);
+
+    // Cleanup
+    cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB);
+
+
+    //************************** CUDA **********************************
+
+
+    /*
+
     //Inicio Conversión**********************************
     int numeroFilasImg = 0;
 
@@ -687,6 +741,8 @@ int main(int argc, char **argv)
     gettimeofday(&tval_after, NULL);
     timersub(&tval_after, &tval_before, &tval_result);
 
+    
+
     if (rows == 720){
         ofstream file;
         file.open("./720.txt", ofstream::app);
@@ -704,6 +760,7 @@ int main(int argc, char **argv)
         file.close();
     }
     //Fin Recolección Hilos y finalización toma de tiempo*****
+    */
 
     //Pasar matrices resultantes a Imagen de salida
     for (int i = 0; i < outRows; i++)

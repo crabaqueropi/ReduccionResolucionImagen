@@ -540,6 +540,7 @@ void *reduccion4k(void *args)
 
 int main(int argc, char **argv)
 {    
+    cout<<"hola11111"<<endl;
     /* char* nombreEntrada = argv[1];
     char* nombreSalida = argv[2];
     NUMTHREADS = atoi(argv[3]); */
@@ -688,6 +689,7 @@ int main(int argc, char **argv)
     // Cleanup
     cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS);
 
+    cout<<"holaaaaaa2222"<<endl;
 
     //************************** CUDA **********************************
 

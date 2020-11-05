@@ -540,7 +540,6 @@ void *reduccion4k(void *args)
 
 int main(int argc, char **argv)
 {    
-    cout<<"hola11111"<<endl;
     /* char* nombreEntrada = argv[1];
     char* nombreSalida = argv[2];
     NUMTHREADS = atoi(argv[3]); */
@@ -689,7 +688,6 @@ int main(int argc, char **argv)
     // Cleanup
     cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS);
 
-    cout<<"holaaaaaa2222"<<endl;
 
     //************************** CUDA **********************************
 
@@ -776,11 +774,13 @@ int main(int argc, char **argv)
     */
 
     //Pasar matrices resultantes a Imagen de salida
+    cout<<outRows<<endl;
+    cout<<outCols<<endl;
     for (int i = 0; i < outRows; i++)
     {
         for (int j = 0; j < outCols; j++)
         {
-            cout<<outB[i][j]<<endl;
+            cout<<"******"<<endl;
             imgOut.at<cv::Vec3b>(i, j)[0] = outB[i][j];
             imgOut.at<cv::Vec3b>(i, j)[1] = outG[i][j];
             imgOut.at<cv::Vec3b>(i, j)[2] = outR[i][j];

@@ -413,7 +413,8 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
                 int R2x2[2][2];
                 int G2x2[2][2];
                 int B2x2[2][2];
-
+                
+                cout<<"Entra"<<endl;
                 reducirMatriz3x3a2x2(R3x3, G3x3, B3x3, R2x2, G2x2, B2x2);
 
                 int indexFilaActualOUT = (i * 2);
@@ -433,6 +434,8 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
     }else{
 
     }
+    cout<<outB[0][0]<<endl;
+    cout<<outB[15][40]<<endl;
 }
 
 void *reduccion1080(void *args)
@@ -776,6 +779,7 @@ int main(int argc, char **argv)
     //Pasar matrices resultantes a Imagen de salida
     cout<<outB[0][0]<<endl;
     cout<<outB[15][40]<<endl;
+
     for (int i = 0; i < outRows; i++)
     {
         cout<<"----------"<<endl;

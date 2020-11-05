@@ -778,6 +778,7 @@ int main(int argc, char **argv)
     {
         for (int j = 0; j < outCols; j++)
         {
+            cout<<outB[i][j]<<endl;
             imgOut.at<cv::Vec3b>(i, j)[0] = outB[i][j];
             imgOut.at<cv::Vec3b>(i, j)[1] = outG[i][j];
             imgOut.at<cv::Vec3b>(i, j)[2] = outR[i][j];

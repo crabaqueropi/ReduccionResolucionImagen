@@ -12,9 +12,7 @@ using namespace std;
 using namespace cv;
 
 int BLOCKSPERGRID  = 32;
-int NUMTHREADS = 128;
-
-int THREADS = 0;
+int NUMNUMTHREADS = 128;
 
 int **outR;
 int **outG;
@@ -287,7 +285,7 @@ Mat cambiarTamanoImagen(Mat img, int row, int nuevoNcolumnas)
     return imgAux;
 }
 
-void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int outR[2][2], int outG[2][2], int outB[2][2])
+__global__ void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3][3], int outR[2][2], int outG[2][2], int outB[2][2])
 {
     double R[3][2];
     double G[3][2];
@@ -380,20 +378,20 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-__global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int **outG, int **outB)
+__global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int **outG, int **outB, int *numeroColumnasImg)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    if (NUMTHREADS<=240){
+    if (NUMNUMTHREADS<=240){
         int filaInicial, filaFinal; //, threadId = *(int *)args;
 
         int numeroFilasImg = 240; // 720/3
-        filaInicial = (numeroFilasImg / THREADS) * threadId;
-        filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
+        filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
+        filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
 
         for (int i = filaInicial; i <= filaFinal; i++)
         {
-            for (int j = 0; j < numeroColumnasImg; j++)
+            for (int j = 0; j < *numeroColumnasImg; j++)
             {
                 int R3x3[3][3];
                 int G3x3[3][3];
@@ -443,8 +441,8 @@ void *reduccion1080(void *args)
 
     int numeroFilasImg = 120; // 1080/9
 
-    filaInicial = (numeroFilasImg / THREADS) * threadId;
-    filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
+    filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
+    filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
 
     for (int i = filaInicial; i <= filaFinal; i++)
     {
@@ -494,8 +492,8 @@ void *reduccion4k(void *args)
     int filaInicial, filaFinal, threadId = *(int *)args;
 
     int numeroFilasImg = 240; // 2160/9
-    filaInicial = (numeroFilasImg / THREADS) * threadId;
-    filaFinal = filaInicial + ((numeroFilasImg / THREADS) - 1);
+    filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
+    filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
 
     for (int i = filaInicial; i <= filaFinal; i++)
     {
@@ -544,11 +542,11 @@ int main(int argc, char **argv)
 {    
     /* char* nombreEntrada = argv[1];
     char* nombreSalida = argv[2];
-    THREADS = atoi(argv[3]); */
+    NUMTHREADS = atoi(argv[3]); */
 
     string nombreEntrada = "imagen720p.jpg";
     string nombreSalida = "imagen720-a480CUDAAAAAAA.jpg";
-    THREADS=2;
+    NUMTHREADS=2;
 
     //ofstream file;
 
@@ -650,6 +648,7 @@ int main(int argc, char **argv)
 
     int sizeIn = sizeof(imgR); // Size sirve para todas las img
     int sizeOut = sizeof(outR); // Size sirve para todas las out
+    int sizeNumeroColumnasImg = sizeof(numeroColumnasImg); 
 
     // Alloc space for device copies of a, b, c
     cudaMalloc((void **)&d_imgR, sizeIn);
@@ -660,14 +659,21 @@ int main(int argc, char **argv)
     cudaMalloc((void **)&d_outG, sizeOut);
     cudaMalloc((void **)&d_outB, sizeOut);
 
+    cudaMalloc((void **)&d_numeroColumnasImg, sizeNumeroColumnasImg);
+
+
+    numeroColumnasImg = cols / 3;
+
+
     // Copy inputs to device
     cudaMemcpy(d_imgR, imgR, sizeIn, cudaMemcpyHostToDevice);
     cudaMemcpy(d_imgG, imgG, sizeIn, cudaMemcpyHostToDevice);
     cudaMemcpy(d_imgB, imgB, sizeIn, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_numeroColumnasImg, numeroColumnasImg, sizeNumeroColumnasImg, cudaMemcpyHostToDevice);
 
-    int threadsPerBlock = NUMTHREADS/BLOCKSPERGRID;
+    int NUMTHREADSPerBlock = NUMNUMTHREADS/BLOCKSPERGRID;
     // Launch add() kernel on GPU with N blocks
-    reduccion720<<<BLOCKSPERGRID, threadsPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB);
+    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg);
 
     // Copy result back to host
     cudaMemcpy(outR, d_outR, sizeOut, cudaMemcpyDeviceToHost);
@@ -675,7 +681,7 @@ int main(int argc, char **argv)
     cudaMemcpy(outB, d_outB, sizeOut, cudaMemcpyDeviceToHost);
 
     // Cleanup
-    cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB);
+    cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg);
 
 
     //************************** CUDA **********************************
@@ -687,8 +693,8 @@ int main(int argc, char **argv)
     int numeroFilasImg = 0;
 
     //  Creación hilos y empezar toma de tiempo
-    int threadId[THREADS], i, *retval;
-    pthread_t thread[THREADS];
+    int threadId[NUMTHREADS], i, *retval;
+    pthread_t thread[NUMTHREADS];
 
     struct timeval tval_before, tval_after, tval_result;
     gettimeofday(&tval_before, NULL);
@@ -698,7 +704,7 @@ int main(int argc, char **argv)
     {
         numeroColumnasImg = cols / 3;
 
-        for (i = 0; i < THREADS; i++)
+        for (i = 0; i < NUMTHREADS; i++)
         {
             threadId[i] = i;
             pthread_create(&thread[i], NULL, reduccion720, &threadId[i]);
@@ -709,7 +715,7 @@ int main(int argc, char **argv)
 
         numeroColumnasImg = cols / 9;
 
-        for (i = 0; i < THREADS; i++)
+        for (i = 0; i < NUMTHREADS; i++)
         {
             threadId[i] = i;
             pthread_create(&thread[i], NULL, reduccion1080, &threadId[i]);
@@ -720,7 +726,7 @@ int main(int argc, char **argv)
 
         numeroColumnasImg = cols / 9;
 
-        for (i = 0; i < THREADS; i++)
+        for (i = 0; i < NUMTHREADS; i++)
         {
             threadId[i] = i;
             pthread_create(&thread[i], NULL, reduccion4k, &threadId[i]);
@@ -733,7 +739,7 @@ int main(int argc, char **argv)
     //Fin Conversión*******************
 
     //Recolección Hilos y finalización toma de tiempo
-    for (i = 0; i < THREADS; i++)
+    for (i = 0; i < NUMTHREADS; i++)
     {
         pthread_join(thread[i], (void **)&retval);
     }
@@ -746,17 +752,17 @@ int main(int argc, char **argv)
     if (rows == 720){
         ofstream file;
         file.open("./720.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
+        file << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
         file.close();
     }else if (rows == 1080){
         ofstream file;
         file.open("./1080.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
+        file << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
         file.close();
     }else{
         ofstream file;
         file.open("./4k.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
+        file << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
         file.close();
     }
     //Fin Recolección Hilos y finalización toma de tiempo*****

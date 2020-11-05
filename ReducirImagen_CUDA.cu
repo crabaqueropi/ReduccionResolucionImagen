@@ -7,6 +7,7 @@
 #include <sys/time.h>
 #include <fstream>
 #include <string> 
+#include "cuPrintf.cu"
 
 using namespace std;
 using namespace cv;
@@ -384,7 +385,7 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
 
     printf("oioioioi");
     printf("%d\n",*NUMTHREADS);
-    
+
     if (*NUMTHREADS<=240){
         int filaInicial, filaFinal; //, threadId = *(int *)args;
 

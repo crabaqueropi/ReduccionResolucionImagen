@@ -778,6 +778,7 @@ int main(int argc, char **argv)
     cout<<outCols<<endl;
     for (int i = 0; i < outRows; i++)
     {
+        cout<<"----------"<<endl;
         for (int j = 0; j < outCols; j++)
         {
             cout<<"******"<<endl;

@@ -764,7 +764,8 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
+    //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
+    int NUMTHREADSPerBlock = 4;
     //Pasar matrices resultantes a Imagen de salida
     cout<<BLOCKSPERGRID<<endl;
     cout<<NUMTHREADSPerBlock<<endl;

@@ -765,6 +765,9 @@ int main(int argc, char **argv)
     }
 
     int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
+    //Pasar matrices resultantes a Imagen de salida
+    cout<<BLOCKSPERGRID<<endl;
+    cout<<NUMTHREADSPerBlock<<endl;
     // Launch add() kernel on GPU with N blocks
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS);
     err = cudaGetLastError();

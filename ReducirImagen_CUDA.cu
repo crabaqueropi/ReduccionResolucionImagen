@@ -11,8 +11,8 @@
 using namespace std;
 using namespace cv;
 
-int BLOCKSPERGRID  = 32;
-int NUMTHREADS = 128;
+int BLOCKSPERGRID  = 16;
+int NUMTHREADS = 64;
 
 int **outR;
 int **outG;
@@ -547,6 +547,9 @@ void *reduccion4k(void *args)
 
 int main(int argc, char **argv)
 {    
+    // Error code to check return values for CUDA calls
+    cudaError_t err = cudaSuccess;
+
     /* char* nombreEntrada = argv[1];
     char* nombreSalida = argv[2];
     NUMTHREADS = atoi(argv[3]); */
@@ -661,39 +664,145 @@ int main(int argc, char **argv)
     int sizeNUMTHREADS = sizeof(NUMTHREADS); 
 
     // Alloc space for device copies of a, b, c
-    cudaMalloc((void **)&d_imgR, sizeIn);
-    cudaMalloc((void **)&d_imgG, sizeIn);
-    cudaMalloc((void **)&d_imgB, sizeIn);
+    err = cudaMalloc((void **)&d_imgR, sizeIn);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device matriz d_imgR (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+    
+    err = cudaMalloc((void **)&d_imgG, sizeIn);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device matriz d_imgG (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
-    cudaMalloc((void **)&d_outR, sizeOut);
-    cudaMalloc((void **)&d_outG, sizeOut);
-    cudaMalloc((void **)&d_outB, sizeOut);
+    err = cudaMalloc((void **)&d_imgB, sizeIn);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device matriz d_imgB (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
-    cudaMalloc((void **)&d_numeroColumnasImg, sizeNumeroColumnasImg);
-    cudaMalloc((void **)&d_NUMTHREADS, sizeNUMTHREADS);
 
+
+    err = cudaMalloc((void **)&d_outR, sizeOut);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device matriz d_outR (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMalloc((void **)&d_outG, sizeOut);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device matriz d_outG (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMalloc((void **)&d_outB, sizeOut);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device matriz d_outB (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMalloc((void **)&d_numeroColumnasImg, sizeNumeroColumnasImg);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device int d_numeroColumnasImg (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMalloc((void **)&d_NUMTHREADS, sizeNUMTHREADS);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to allocate device int d_NUMTHREADS (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+    
+    //después de printf
+    //fflush(stdout);
 
     numeroColumnasImg = cols / 3;
 
 
     // Copy inputs to device
-    cudaMemcpy(d_imgR, imgR, sizeIn, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_imgG, imgG, sizeIn, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_imgB, imgB, sizeIn, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeNumeroColumnasImg, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_NUMTHREADS, &NUMTHREADS, sizeNUMTHREADS, cudaMemcpyHostToDevice);
+    err = cudaMemcpy(d_imgR, imgR, sizeIn, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matriz imgR from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMemcpy(d_imgG, imgG, sizeIn, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matriz imgG from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMemcpy(d_imgB, imgB, sizeIn, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matriz imgB from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeNumeroColumnasImg, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy valor numeroColumnasImg from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMemcpy(d_NUMTHREADS, &NUMTHREADS, sizeNUMTHREADS, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy valor NUMTHREADS from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
     int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
     // Launch add() kernel on GPU with N blocks
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS);
+    err = cudaGetLastError();
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to launch reduccion720 kernel (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
     // Copy result back to host
-    cudaMemcpy(outR, d_outR, sizeOut, cudaMemcpyDeviceToHost);
-    cudaMemcpy(outG, d_outG, sizeOut, cudaMemcpyDeviceToHost);
-    cudaMemcpy(outB, d_outB, sizeOut, cudaMemcpyDeviceToHost);
+    err = cudaMemcpy(outR, d_outR, sizeOut, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matrix d_outR from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMemcpy(outG, d_outG, sizeOut, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matrix d_outG from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    err = cudaMemcpy(outB, d_outB, sizeOut, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matrix d_outB from device to host (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
     // Cleanup
-    cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS);
+    err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to free device matrix d_imgR (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
 
     //************************** CUDA **********************************

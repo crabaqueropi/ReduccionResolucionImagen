@@ -408,6 +408,7 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
                         R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
                         printf("%d", imgR[0][0]);
                         G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        printf("///////\n");
                         B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
                     }
                 }

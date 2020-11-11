@@ -382,10 +382,11 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    printf("oioioioi");
+    printf("Entro a reduccion720\n");
     printf("%d\n",*NUMTHREADS);
 
     if (*NUMTHREADS<=240){
+        printf("Entro al IF\n");
         int filaInicial, filaFinal; //, threadId = *(int *)args;
 
         int numeroFilasImg = 240; // 720/3
@@ -417,7 +418,7 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
                 int G2x2[2][2];
                 int B2x2[2][2];
                 
-                printf("Entro");
+                printf("Entro al For\n");
                 reducirMatriz3x3a2x2(R3x3, G3x3, B3x3, R2x2, G2x2, B2x2);
 
                 int indexFilaActualOUT = (i * 2);
@@ -436,10 +437,7 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
         }
     }else{
 
-    }
-    
-    printf("%d\n",outB[0][0]); 
-    printf("%d\n",outB[15][40]); 
+    } 
 }
 
 void *reduccion1080(void *args)

@@ -378,17 +378,17 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-__global__ void reduccion720(int **imgRAux, int **imgGAux, int **imgBAux, int **outRAux, int **outGAux, int **outBAux, int *numeroColumnasImg, int *NUMTHREADS)
+__global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outRAux, int *outGAux, int *outBAux, int *numeroColumnasImg, int *NUMTHREADS)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    int **imgR = imgRAux;
-    int **imgG = imgGAux;
-    int **imgB = imgBAux;
+    int **imgR = &imgRAux;
+    int **imgG = &imgGAux;
+    int **imgB = &imgBAux;
 
-    int **outR = outRAux;
-    int **outG = outGAux;
-    int **outB = outBAux;
+    int **outR = &outRAux;
+    int **outG = &outGAux;
+    int **outB = &outBAux;
 
     if (*NUMTHREADS<=240){
         int filaInicial, filaFinal; //, threadId = *(int *)args;
@@ -651,12 +651,12 @@ int main(int argc, char **argv)
 
     //************************** CUDA **********************************
 
-    int **d_imgR;
-    int **d_imgG;
-    int **d_imgB;
-    int **d_outR;
-    int **d_outG;
-    int **d_outB;
+    int *d_imgR;
+    int *d_imgG;
+    int *d_imgB;
+    int *d_outR;
+    int *d_outG;
+    int *d_outB;
     int *d_numeroColumnasImg;
     int *d_NUMTHREADS;
     

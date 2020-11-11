@@ -393,7 +393,6 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
         {
             for (int j = 0; j < *numeroColumnasImg; j++)
             {
-                printf("**************\n");
                 int R3x3[3][3];
                 int G3x3[3][3];
                 int B3x3[3][3];
@@ -405,7 +404,9 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
                 {
                     for (int l = 0; l < 3; l++)
                     {
+                        printf("-----\n");
                         R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        printf("%d", R3x3[k][l]);
                         G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
                         B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
                     }
@@ -551,7 +552,6 @@ int main(int argc, char **argv)
 
     string nombreEntrada = "imagen720p.jpg";
     string nombreSalida = "imagen720-a480CUDAAAAAAA.jpg";
-    NUMTHREADS=2;
 
     //ofstream file;
 
@@ -761,9 +761,7 @@ int main(int argc, char **argv)
 
     //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
     int NUMTHREADSPerBlock = 4;
-    //Pasar matrices resultantes a Imagen de salida
-    cout<<BLOCKSPERGRID<<endl;
-    cout<<NUMTHREADSPerBlock<<endl;
+    NUMTHREADS = 4; //NUMTHREADSPerBlock;
     // Launch add() kernel on GPU with N blocks
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS);
     err = cudaGetLastError();

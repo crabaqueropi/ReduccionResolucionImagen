@@ -386,12 +386,17 @@ __global__ void reduccion720(int **imgR, int **imgG, int **imgB, int **outR, int
     printf("%d\n",*NUMTHREADS);
 
     if (*NUMTHREADS<=240){
-        printf("Entro al IF\n");
         int filaInicial, filaFinal; //, threadId = *(int *)args;
 
         int numeroFilasImg = 240; // 720/3
         filaInicial = (numeroFilasImg / *NUMTHREADS) * threadId;
         filaFinal = filaInicial + ((numeroFilasImg / *NUMTHREADS) - 1);
+
+        printf("Entro al IF\n");
+        printf("%d\n",filaInicial);
+        printf("%d\n",filaFinal);
+        printf("%d\n",*numeroColumnasImg);
+        printf("**************\n");
 
         for (int i = filaInicial; i <= filaFinal; i++)
         {

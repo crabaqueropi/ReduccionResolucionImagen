@@ -381,7 +381,6 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
 __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outRAux, int *outGAux, int *outBAux, int *numeroColumnasImg, int *NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
-    printf("%d*****", rowsAux);
 
     const int rows = rowsAux;
     const int cols = colsAux;
@@ -478,17 +477,19 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
 
     } 
 
-    __syncthreads();
+    //__syncthreads();
 
+    /*
     index = 0;
     for(int i = 0; i< outRows;i++){
         for(int j = 0; j< outCols;j++){
-            outRAux[index] = outR[i][j];
-            outGAux[index] = outG[i][j];
-            outBAux[index] = outB[i][j];
+            outRAux[index] = 222;//outR[i][j];
+            outGAux[index] = 222;//outG[i][j];
+            outBAux[index] = 222;//outB[i][j];
             index++;
         }
     }
+    */
 }
 
 /*

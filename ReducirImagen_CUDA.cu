@@ -399,16 +399,16 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int numeroColumnasImg, 
         imgG[i] = new int[colsAux];
         //imgB[i] = new int[colsAux];
     }
-/*
+
     int index = 0;
     for(int i = 0; i<rowsAux;i++){
         for(int j = 0; j<colsAux;j++){
             imgR[i][j]= imgRAux[index];
-            imgG[i][j]= imgGAux[index];
+            //imgG[i][j]= imgGAux[index];
             //imgB[i][j]= imgBAux[index];
             index++;
         }
-    }*/
+    }
 
     for(int i = 0; i<10;i++){
         for(int j = 0; j<10;j++){

@@ -679,6 +679,13 @@ int main(int argc, char **argv)
         }
     }
 
+    for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", imgR[i][j]);
+        }
+        printf("-----\n");
+    }
+
     const int outRows = 480;
     const int outCols = (outRows * img.cols) / img.rows;
 

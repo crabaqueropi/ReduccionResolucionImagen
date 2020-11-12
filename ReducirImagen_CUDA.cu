@@ -828,7 +828,7 @@ int main(int argc, char **argv)
         for(int j = 0; j<3;j++){
             printf("%d  ", matriz2[i][j]);
         }
-        printf("-----\n");
+        printf("+++++\n");
     }
 
     free(a);free(c);

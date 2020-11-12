@@ -386,6 +386,25 @@ __global__ void reduccion720(int *a, int *imgR, int *imgG, int *imgB, int *outR,
         printf("%d\n", a[i]);
     }
 
+    int matriz[3][3];
+
+    int index = 0;
+    for(int i = 0; j<3;j++){
+        for(int j = 0; j<3;j++){
+            matriz[i][j]= a[index];
+            index++;
+        }
+    }
+
+    for(int i = 0; j<3;j++){
+        for(int j = 0; j<3;j++){
+            printf("%d  ", matriz[i][j]);
+        }
+        printf("-----\n");
+    }
+
+    
+
 /*
     if (*NUMTHREADS<=240){
         int filaInicial, filaFinal; //, threadId = *(int *)args;
@@ -647,15 +666,20 @@ int main(int argc, char **argv)
     // Fin creación de matrices
 
     //************************** CUDA **********************************
-
+    int matriz [3][3] = {{1,2,3},{4,5,6}};
     int *a;
     int *d_a;
-    int size = 5 * sizeof(int);
+    int size = 3*3*sizeof(int);
+
     cudaMalloc((void **)&d_a, size);
     a = (int *)malloc(size); 
 
-    for(int i = 0; i<5;i++){
-        a[i]=i;
+    int index = 0;
+    for(int i = 0; j<3;j++){
+        for(int j = 0; j<3;j++){
+            a[index]=matriz[i][j];
+            index++;
+        }
     }
 
     cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
@@ -779,11 +803,15 @@ int main(int argc, char **argv)
     int NUMTHREADSPerBlock = 4;
     NUMTHREADS = 4; //NUMTHREADSPerBlock;
     // Launch add() kernel on GPU with N blocks
+
+
+    BLOCKSPERGRID=1; //quitar
+    NUMTHREADSPerBlock=1; //quitar
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_a, d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS);
     free(a);
     cudaFree(d_a);
 
-    
+
     err = cudaGetLastError();
     if (err != cudaSuccess)
     {

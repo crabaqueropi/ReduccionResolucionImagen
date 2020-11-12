@@ -382,21 +382,21 @@ __global__ void reduccion720(int *a, int *imgR, int *imgG, int *imgB, int *outR,
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    for(int i = 0; i<5;i++){
+    for(int i = 0; i<6;i++){
         printf("%d\n", a[i]);
     }
 
     int matriz[3][3];
 
     int index = 0;
-    for(int i = 0; j<3;j++){
+    for(int i = 0; i<3;i++){
         for(int j = 0; j<3;j++){
             matriz[i][j]= a[index];
             index++;
         }
     }
 
-    for(int i = 0; j<3;j++){
+    for(int i = 0; i<3;i++){
         for(int j = 0; j<3;j++){
             printf("%d  ", matriz[i][j]);
         }
@@ -675,7 +675,7 @@ int main(int argc, char **argv)
     a = (int *)malloc(size); 
 
     int index = 0;
-    for(int i = 0; j<3;j++){
+    for(int i = 0; i<3;i++){
         for(int j = 0; j<3;j++){
             a[index]=matriz[i][j];
             index++;

@@ -378,10 +378,15 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-__global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *outG, int *outB, int *numeroColumnasImg, int *NUMTHREADS)
+__global__ void reduccion720(int *a, int *imgR, int *imgG, int *imgB, int *outR, int *outG, int *outB, int *numeroColumnasImg, int *NUMTHREADS)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
+    for(int i = 0; i<5;i++){
+        printf("%d\n", a[i]);
+    }
+
+/*
     if (*NUMTHREADS<=240){
         int filaInicial, filaFinal; //, threadId = *(int *)args;
 
@@ -435,7 +440,7 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
         }
     }else{
 
-    } 
+    } */
 }
 
 void *reduccion1080(void *args)
@@ -643,6 +648,18 @@ int main(int argc, char **argv)
 
     //************************** CUDA **********************************
 
+    int *a;
+    int *d_a;
+    int size = 5 * sizeof(int);
+    cudaMalloc((void **)&d_a, size);
+    a = (int *)malloc(size); 
+
+    for(int i = 0; i<5;i++){
+        a[i]=i;
+    }
+
+    cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
+
     int *d_imgR;
     int *d_imgG;
     int *d_imgB;
@@ -655,8 +672,7 @@ int main(int argc, char **argv)
 
     int sizeIn = sizeof(imgR); // Size sirve para todas las img
     int sizeOut = sizeof(outR); // Size sirve para todas las out
-    int sizeNumeroColumnasImg = sizeof(numeroColumnasImg); 
-    int sizeNUMTHREADS = sizeof(NUMTHREADS); 
+    int sizeEntero = sizeof(int); 
 
     // Alloc space for device copies of a, b, c
     err = cudaMalloc((void **)&d_imgR, sizeIn);
@@ -703,14 +719,14 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMalloc((void **)&d_numeroColumnasImg, sizeNumeroColumnasImg);
+    err = cudaMalloc((void **)&d_numeroColumnasImg, sizeEntero);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to allocate device int d_numeroColumnasImg (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMalloc((void **)&d_NUMTHREADS, sizeNUMTHREADS);
+    err = cudaMalloc((void **)&d_NUMTHREADS, sizeEntero);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to allocate device int d_NUMTHREADS (error code %s)!\n", cudaGetErrorString(err));
@@ -745,14 +761,14 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeNumeroColumnasImg, cudaMemcpyHostToDevice);
+    err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeEntero, cudaMemcpyHostToDevice);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to copy valor numeroColumnasImg from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMemcpy(d_NUMTHREADS, &NUMTHREADS, sizeNUMTHREADS, cudaMemcpyHostToDevice);
+    err = cudaMemcpy(d_NUMTHREADS, &NUMTHREADS, sizeEntero, cudaMemcpyHostToDevice);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to copy valor NUMTHREADS from host to device (error code %s)!\n", cudaGetErrorString(err));
@@ -763,7 +779,11 @@ int main(int argc, char **argv)
     int NUMTHREADSPerBlock = 4;
     NUMTHREADS = 4; //NUMTHREADSPerBlock;
     // Launch add() kernel on GPU with N blocks
-    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS);
+    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_a, d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS);
+    free(a);
+    cudaFree(d_a);
+
+    
     err = cudaGetLastError();
     if (err != cudaSuccess)
     {

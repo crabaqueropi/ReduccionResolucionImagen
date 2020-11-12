@@ -378,16 +378,16 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-__global__ void reduccion720(int *a, int *imgR, int *numeroColumnasImg, int *NUMTHREADS, int *rowsAux, int *colsAux, int *outRowsAux, int *outColsAux)
+__global__ void reduccion720(int *a, int *imgR, int numeroColumnasImg, int NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    printf("-%d\n", numeroColumnasImg);
-    printf("-%d\n", NUMTHREADS);
-    printf("-%d\n", rowsAux);
-    printf("-%d\n", colsAux);
-    printf("-%d\n", outRowsAux);
-    printf("-%d\n", outColsAux);
+    printf("* %d\n", numeroColumnasImg);
+    printf("* %d\n", NUMTHREADS);
+    printf("* %d\n", rowsAux);
+    printf("* %d\n", colsAux);
+    printf("* %d\n", outRowsAux);
+    printf("* %d\n", outColsAux);
 
     for(int i = 0; i<9;i++){
         printf("%d\n", a[i]);
@@ -874,7 +874,7 @@ int main(int argc, char **argv)
 
     BLOCKSPERGRID=1; //quitar
     NUMTHREADSPerBlock=1; //quitar
-    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_a, d_imgR, d_numeroColumnasImg, d_NUMTHREADS, d_rows, d_cols, d_outRows, d_outCols);
+    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_a, d_imgR, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
     free(a);
     cudaFree(d_a);
 

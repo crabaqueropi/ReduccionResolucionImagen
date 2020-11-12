@@ -387,8 +387,8 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
     const int outRows = outRowsAux;
     const int outCols = outColsAux;
 
-    printf("%dAAA-*-* \n", rowsAux);
-    printf("%dAAA-*-* \n", colsAux);
+    printf("%dAAA-*-* \n", rows);
+    printf("%dAAA-*-* \n", cols);
 
     int **imgR = new int *[rows];
     for (int i = 0; i < rows; ++i)
@@ -414,8 +414,8 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
     for (int i = 0; i < outRows; ++i)
         outB[i] = new int[outCols];
 
-    printf("%d-*-* \n", rowsAux);
-    printf("%d-*-* \n", colsAux);
+    printf("%d-*-* \n", rows);
+    printf("%d-*-* \n", cols);
 
     int index = 0;
     for(int i = 0; i<rows;i++){

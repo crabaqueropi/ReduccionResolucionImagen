@@ -17,8 +17,8 @@ int NUMTHREADS = 64;
 int **outR;
 int **outG;
 int **outB;
-int **imgG;
-int **imgB;
+int *imgG;
+int *imgB;
 int numeroColumnasImg = 0;
 
 void matriz4x4Amatriz2x2(int imgR[4][4], int imgG[4][4], int imgB[4][4], int outR[2][2], int outG[2][2], int outB[2][2])
@@ -377,54 +377,36 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-__global__ void reduccion720(int *a, int *imgRAux, int numeroColumnasImg, int NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
+__global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int numeroColumnasImg, int NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    printf("* %d\n", numeroColumnasImg);
+    /*printf("* %d\n", numeroColumnasImg);
     printf("* %d\n", NUMTHREADS);
     printf("* %d\n", rowsAux);
     printf("* %d\n", colsAux);
     printf("* %d\n", outRowsAux);
-    printf("* %d\n", outColsAux);
-
-    for(int i = 0; i<9;i++){
-        printf("%d\n", a[i]);
-    }
-
-    int matriz[3][3];
-
-    int index = 0;
-    for(int i = 0; i<3;i++){
-        for(int j = 0; j<3;j++){
-            matriz[i][j]= a[index];
-            index++;
-        }
-    }
-
-    for(int i = 0; i<3;i++){
-        for(int j = 0; j<3;j++){
-            printf("%d  ", matriz[i][j]);
-        }
-        printf("-----\n");
-    }
-
-    //-----
-
-    for(int i = 700; i<800;i++){
-        printf("%d  ", imgRAux[i]);
-    }
+    printf("* %d\n", outColsAux);*/
 
     int **imgR;
+    int **imgG;
+    int **imgB;
 
     imgR = new int *[rowsAux];
-    for (size_t i = 0; i < rowsAux; ++i)
+    imgG = new int *[rowsAux];
+    imgB = new int *[rowsAux];
+    for (size_t i = 0; i < rowsAux; ++i){
         imgR[i] = new int[colsAux];
+        imgG[i] = new int[colsAux];
+        imgB[i] = new int[colsAux];
+    }
 
-    index = 0;
+    int index = 0;
     for(int i = 0; i<rowsAux;i++){
         for(int j = 0; j<colsAux;j++){
             imgR[i][j]= imgRAux[index];
+            imgG[i][j]= imgGAux[index];
+            imgB[i][j]= imgBAux[index];
             index++;
         }
     }
@@ -432,6 +414,20 @@ __global__ void reduccion720(int *a, int *imgRAux, int numeroColumnasImg, int NU
     for(int i = 0; i<10;i++){
         for(int j = 0; j<10;j++){
             printf("%d  ", imgR[i][j]);
+        }
+        printf("-----\n");
+    }
+    printf("******\n");
+    for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", imgG[i][j]);
+        }
+        printf("-----\n");
+    }
+    printf("******\n");
+    for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", imgB[i][j]);
         }
         printf("-----\n");
     }
@@ -657,10 +653,12 @@ int main(int argc, char **argv)
     int *imgR;
 
     imgR = (int *)malloc(sizeImagenes); 
+    imgG = (int *)malloc(sizeImagenes); 
+    imgB = (int *)malloc(sizeImagenes); 
 
     /*imgR = new int *[rows];
     for (size_t i = 0; i < rows; ++i)
-        imgR[i] = new int[cols];*/
+        imgR[i] = new int[cols];
 
     imgG = new int *[rows];
     for (size_t i = 0; i < rows; ++i)
@@ -668,7 +666,7 @@ int main(int argc, char **argv)
 
     imgB = new int *[rows];
     for (size_t i = 0; i < rows; ++i)
-        imgB[i] = new int[cols];
+        imgB[i] = new int[cols];*/
 
     
     int index = 0;
@@ -677,14 +675,10 @@ int main(int argc, char **argv)
         for (int j = 0; j < img.cols; j++)
         {
             imgR[index] = img.at<cv::Vec3b>(i, j)[2];
-            imgG[i][j] = img.at<cv::Vec3b>(i, j)[1];
-            imgB[i][j] = img.at<cv::Vec3b>(i, j)[0];
+            imgG[index] = img.at<cv::Vec3b>(i, j)[1];
+            imgB[index] = img.at<cv::Vec3b>(i, j)[0];
             index++;
         }
-    }
-
-    for(int i = 700; i<800;i++){
-        printf("%d  ", imgR[i]);
     }
 
     const int outRows = 480;
@@ -741,9 +735,6 @@ int main(int argc, char **argv)
 
     int sizeEntero = sizeof(int);     
 
-    int sizeIn = sizeof(imgR); // Size sirve para todas las img
-    int sizeOut = sizeof(outR); // Size sirve para todas las out
-
     // Alloc space for device copies of a, b, c
     err = cudaMalloc((void **)&d_imgR, sizeImagenes);
     if (err != cudaSuccess)
@@ -751,16 +742,14 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to allocate device matriz d_imgR (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-    
-    /*
-    err = cudaMalloc((void **)&d_imgG, sizeIn);
+    err = cudaMalloc((void **)&d_imgG, sizeImagenes);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to allocate device matriz d_imgG (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMalloc((void **)&d_imgB, sizeIn);
+    err = cudaMalloc((void **)&d_imgB, sizeImagenes);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to allocate device matriz d_imgB (error code %s)!\n", cudaGetErrorString(err));
@@ -768,7 +757,7 @@ int main(int argc, char **argv)
     }
 
 
-
+    /*
     err = cudaMalloc((void **)&d_outR, sizeOut);
     if (err != cudaSuccess)
     {
@@ -843,21 +832,20 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to copy matriz imgR from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-/*
-    err = cudaMemcpy(d_imgG, imgG, sizeIn, cudaMemcpyHostToDevice);
+    err = cudaMemcpy(d_imgG, imgG, sizeImagenes, cudaMemcpyHostToDevice);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to copy matriz imgG from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMemcpy(d_imgB, imgB, sizeIn, cudaMemcpyHostToDevice);
+    err = cudaMemcpy(d_imgB, imgB, sizeImagenes, cudaMemcpyHostToDevice);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to copy matriz imgB from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-    */
+    
 
     err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeEntero, cudaMemcpyHostToDevice);
     if (err != cudaSuccess)
@@ -908,7 +896,7 @@ int main(int argc, char **argv)
 
     BLOCKSPERGRID=1; //quitar
     NUMTHREADSPerBlock=1; //quitar
-    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_a, d_imgR, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
+    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
     free(a);
     cudaFree(d_a);
 
@@ -945,7 +933,7 @@ int main(int argc, char **argv)
     */
 
     // Cleanup
-    err = cudaFree(d_imgR); /*cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB);*/ cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS); cudaFree(d_rows); cudaFree(d_cols); cudaFree(d_outRows); cudaFree(d_outCols);
+    err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB); /*cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB);*/ cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS); cudaFree(d_rows); cudaFree(d_cols); cudaFree(d_outRows); cudaFree(d_outCols);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to free device matrix d_imgR (error code %s)!\n", cudaGetErrorString(err));
@@ -1040,10 +1028,12 @@ int main(int argc, char **argv)
     //Fin Pasar matrices resultantes a Imagen de salida
 
     //Inicio borrar matrices
-    free(a);
+    free(imgR);
+    free(imgG);
+    free(imgB);
     /*for (size_t i = 0; i < rows; ++i)
         delete imgR[i];
-    delete imgR;*/
+    delete imgR;
 
     for (size_t i = 0; i < rows; ++i)
         delete imgG[i];
@@ -1051,7 +1041,7 @@ int main(int argc, char **argv)
 
     for (size_t i = 0; i < rows; ++i)
         delete imgB[i];
-    delete imgB;
+    delete imgB;*/
 
     for (size_t i = 0; i < outRows; ++i)
         delete outR[i];

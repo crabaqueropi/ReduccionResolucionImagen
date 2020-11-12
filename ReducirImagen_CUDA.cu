@@ -382,20 +382,9 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    const int rows = 720;
-    const int cols = 1200;
-    const int outRows = 100;
-    const int outCols = 100;
-
-    printf("%dAAA-*-* \n", rowsAux);
-    printf("%dAAA-*-* \n", colsAux);
-
-    printf("%dBBB-*-* \n", outRowsAux);
-    printf("%dBBB-*-* \n", outColsAux);
-
-    int imgR[rows][cols];
-    int imgG[rows][cols];
-    int imgB[rows][cols];
+    for(int i = 0; i<5;i++){
+        printf("%d\n", a[i]);
+    }
 
     int outR[outRows][outCols];
     int outG[outRows][outCols];
@@ -429,14 +418,16 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
     printf("%d-*-* \n", cols);
 
     int index = 0;
-    for(int i = 0; i<rows;i++){
-        for(int j = 0; j<cols;j++){
-            printf("%d\n", imgRAux[index]);
-
-            imgR[i][j]= imgRAux[index];
-            imgG[i][j]= imgGAux[index];
-            imgB[i][j]= imgBAux[index];
+    for(int i = 0; j<3;j++){
+        for(int j = 0; j<3;j++){
+            matriz[i][j]= a[index];
             index++;
+        }
+    }
+
+    for(int i = 0; j<3;j++){
+        for(int j = 0; j<3;j++){
+            printf("%d  ", matriz[i][j]);
         }
     }
 
@@ -745,6 +736,23 @@ int main(int argc, char **argv)
     // Fin creación de matrices
 
     //************************** CUDA **********************************
+    int matriz [3][3] = {{1,2,3},{4,5,6}};
+    int *a;
+    int *d_a;
+    int size = 3*3*sizeof(int);
+
+    cudaMalloc((void **)&d_a, size);
+    a = (int *)malloc(size); 
+
+    int index = 0;
+    for(int i = 0; j<3;j++){
+        for(int j = 0; j<3;j++){
+            a[index]=matriz[i][j];
+            index++;
+        }
+    }
+
+    cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
 
     int *d_imgR;
     int *d_imgG;

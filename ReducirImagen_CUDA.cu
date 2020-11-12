@@ -17,7 +17,6 @@ int NUMTHREADS = 64;
 int **outR;
 int **outG;
 int **outB;
-int *imgR;
 int **imgG;
 int **imgB;
 int numeroColumnasImg = 0;
@@ -650,6 +649,8 @@ int main(int argc, char **argv)
     const int cols = img.cols;
 
     int sizeImagenes = rows*cols*sizeof(int);
+
+    int *imgR;
 
     imgR = (int *)malloc(sizeImagenes); 
 

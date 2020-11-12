@@ -382,6 +382,8 @@ __global__ void reduccion720(int *a, int *imgR, int *imgG, int *imgB, int *outR,
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
+    printf("-%d\n", numeroColumnasImg);
+    printf("-%d\n", NUMTHREADS);
     printf("-%d\n", rowsAux);
     printf("-%d\n", colsAux);
     printf("-%d\n", outRowsAux);

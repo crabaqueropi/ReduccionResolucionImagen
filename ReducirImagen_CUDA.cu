@@ -382,7 +382,7 @@ __global__ void reduccion720(int *a, int *imgR, int *imgG, int *imgB, int *outR,
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    for(int i = 0; i<6;i++){
+    for(int i = 0; i<9;i++){
         printf("%d\n", a[i]);
     }
 
@@ -666,7 +666,7 @@ int main(int argc, char **argv)
     // Fin creación de matrices
 
     //************************** CUDA **********************************
-    int matriz [3][3] = {{1,2,3},{4,5,6}};
+    int matriz [3][3] = {{1,2,3},{4,5,6},{7,8,9}};
     int *a;
     int *d_a;
     int size = 3*3*sizeof(int);

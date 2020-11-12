@@ -378,7 +378,7 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-__global__ void reduccion720(int *a, int *imgR, int numeroColumnasImg, int NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
+__global__ void reduccion720(int *a, int *imgRAux, int numeroColumnasImg, int NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -409,6 +409,31 @@ __global__ void reduccion720(int *a, int *imgR, int numeroColumnasImg, int NUMTH
         }
         printf("-----\n");
     }
+
+    //-----
+
+    for(int i = 0; i<10;i++){
+        printf("%d\n", imgRAux[i*3]);
+    }
+
+    int imgR[720][1278];
+
+    index = 0;
+    for(int i = 0; i<720;i++){
+        for(int j = 0; j<1278;j++){
+            imgR[i][j]= imgRAux[index];
+            index++;
+        }
+    }
+
+    for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", imgR[i][j]);
+        }
+        printf("-----\n");
+    }
+
+
 
     
 

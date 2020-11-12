@@ -417,13 +417,13 @@ __global__ void reduccion720(int *a, int *imgRAux, int numeroColumnasImg, int NU
 
     int **imgR;
 
-    imgR = new int *[720];
-    for (size_t i = 0; i < 720; ++i)
-        imgR[i] = new int[1278];
+    imgR = new int *[rowsAux];
+    for (size_t i = 0; i < rowsAux; ++i)
+        imgR[i] = new int[colsAux];
 
     index = 0;
-    for(int i = 0; i<720;i++){
-        for(int j = 0; j<1278;j++){
+    for(int i = 0; i<rowsAux;i++){
+        for(int j = 0; j<colsAux;j++){
             imgR[i][j]= imgRAux[index];
             index++;
         }

@@ -391,27 +391,27 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
     printf("%dAAA-*-* \n", cols);
 
     int **imgR = new int *[rows];
-    for (int i = 0; i < rows; ++i)
+    for (int i = 0; i < rows; i++)
         imgR[i] = new int[cols];
 
     int **imgG = new int *[rows];
-    for (int i = 0; i < rows; ++i)
+    for (int i = 0; i < rows; i++)
         imgG[i] = new int[cols];
     
     int **imgB = new int *[rows];
-    for (int i = 0; i < rows; ++i)
+    for (int i = 0; i < rows; i++)
         imgB[i] = new int[cols];
 
     int **outR = new int *[outRows];
-    for (int i = 0; i < outRows; ++i)
+    for (int i = 0; i < outRows; i++)
         outR[i] = new int[outCols];
 
     int **outG = new int *[outRows];
-    for (int i = 0; i < outRows; ++i)
+    for (int i = 0; i < outRows; i++)
         outG[i] = new int[outCols];
     
     int **outB = new int *[outRows];
-    for (int i = 0; i < outRows; ++i)
+    for (int i = 0; i < outRows; i++)
         outB[i] = new int[outCols];
 
     printf("%d-*-* \n", rows);

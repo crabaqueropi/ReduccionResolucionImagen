@@ -17,7 +17,6 @@ int NUMTHREADS = 64;
 int **outR;
 int **outG;
 int **outB;
-int *imgG;
 int **imgB;
 int numeroColumnasImg = 0;
 
@@ -651,6 +650,7 @@ int main(int argc, char **argv)
     int sizeImagenes = rows*cols*sizeof(int);
 
     int *imgR;
+    int *imgG;
 
     imgR = (int *)malloc(sizeImagenes); 
     imgG = (int *)malloc(sizeImagenes); 

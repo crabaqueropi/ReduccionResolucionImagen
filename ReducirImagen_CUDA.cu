@@ -414,7 +414,7 @@ __global__ void reduccion720(int *a, int *imgRAux, int numeroColumnasImg, int NU
     for(int i = 700; i<800;i++){
         printf("%d  ", imgRAux[i]);
     }
-/*
+
     int imgR[720][1278];
 
     index = 0;
@@ -424,7 +424,7 @@ __global__ void reduccion720(int *a, int *imgRAux, int numeroColumnasImg, int NU
             index++;
         }
     }
-
+/*
     for(int i = 0; i<10;i++){
         for(int j = 0; j<10;j++){
             printf("%d  ", imgR[i][j]);

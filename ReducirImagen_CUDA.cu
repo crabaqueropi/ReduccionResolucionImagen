@@ -392,7 +392,7 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int numeroColumnasImg, 
     //int **imgB;
 
     imgR = new int *[rowsAux];
-    //imgG = new int *[rowsAux];
+    imgG = new int *[rowsAux];
     //imgB = new int *[rowsAux];
     for (size_t i = 0; i < rowsAux; ++i){
         imgR[i] = new int[colsAux];

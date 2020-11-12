@@ -381,6 +381,7 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
 __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outRAux, int *outGAux, int *outBAux, int *numeroColumnasImg, int *NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
+    printf("%d*****", rowsAux);
 
     const int rows = rowsAux;
     const int cols = colsAux;

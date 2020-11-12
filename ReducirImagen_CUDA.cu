@@ -679,7 +679,7 @@ int main(int argc, char **argv)
         }
     }
 
-    for(int i = 0; i<15;i++){
+    for(int i = 700; i<800;i++){
         printf("%d  ", imgR[i]);
     }
 

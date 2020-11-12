@@ -378,7 +378,7 @@ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para4K(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-__global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outRAux, int *outGAux, int *outBAux, int *numeroColumnasImg, int *NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
+__global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outRAux, int *outGAux, int *outBAux, int *numeroColumnasImg, int *NUMTHREADS, int *rowsAux, int *colsAux, int *outRowsAux, int *outColsAux)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -919,7 +919,7 @@ int main(int argc, char **argv)
     NUMTHREADS = 4; //NUMTHREADSPerBlock;
     // Launch add() kernel on GPU with N blocks
 
-    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS, rows, cols, outRows, outCols);
+    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS, d_rows, d_cols, d_outRows, d_outCols);
     err = cudaGetLastError();
     if (err != cudaSuccess)
     {

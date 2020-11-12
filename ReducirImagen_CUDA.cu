@@ -808,7 +808,30 @@ int main(int argc, char **argv)
     BLOCKSPERGRID=1; //quitar
     NUMTHREADSPerBlock=1; //quitar
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_a, d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, d_numeroColumnasImg, d_NUMTHREADS);
-    free(a);
+    
+
+    int *c;
+    c = (int *)malloc(size);
+    cudaMemcpy(c, d_a, size, cudaMemcpyDeviceToHost);
+
+    int matriz2[3][3];
+
+    index = 0;
+    for(int i = 0; i<3;i++){
+        for(int j = 0; j<3;j++){
+            matriz2[i][j]= c[index];
+            index++;
+        }
+    }
+
+    for(int i = 0; i<3;i++){
+        for(int j = 0; j<3;j++){
+            printf("%d  ", matriz2[i][j]);
+        }
+        printf("-----\n");
+    }
+
+    free(a);free(c);
     cudaFree(d_a);
 
 

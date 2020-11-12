@@ -411,12 +411,14 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
     for (int i = 0; i < outRows; ++i)
         outB[i] = new int[outCols];
 
+    printf("%d-*-* \n", rows);
+    printf("%d-*-* \n", cols);
 
     int index = 0;
     for(int i = 0; i<rows;i++){
         for(int j = 0; j<cols;j++){
             printf("%d\n", imgRAux[index]);
-            
+
             imgR[i][j]= imgRAux[index];
             imgG[i][j]= imgGAux[index];
             imgB[i][j]= imgBAux[index];

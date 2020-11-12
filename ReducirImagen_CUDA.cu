@@ -932,7 +932,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to copy matrix d_outB from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-    */
+    
 
     // Cleanup
     err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB);cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS);
@@ -941,6 +941,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to free device matrix d_imgR (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+    */
 
 
     //************************** CUDA **********************************

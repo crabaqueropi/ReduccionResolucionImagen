@@ -382,15 +382,26 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
-    const int rows = rowsAux;
-    const int cols = colsAux;
-    const int outRows = outRowsAux;
-    const int outCols = outColsAux;
+    const int rows = 720;
+    const int cols = 1200;
+    const int outRows = 100;
+    const int outCols = 100;
 
-    printf("%dAAA-*-* \n", rows);
-    printf("%dAAA-*-* \n", cols);
+    printf("%dAAA-*-* \n", rowsAux);
+    printf("%dAAA-*-* \n", colsAux);
 
-    int **imgR = new int *[rows];
+    printf("%dBBB-*-* \n", outRowsAux);
+    printf("%dBBB-*-* \n", outColsAux);
+
+    int imgR[rows][cols];
+    int imgG[rows][cols];
+    int imgB[rows][cols];
+
+    int outR[outRows][outCols];
+    int outG[outRows][outCols];
+    int outB[outRows][outCols];
+
+    /*int **imgR = new int *[rows];
     for (int i = 0; i < rows; i++)
         imgR[i] = new int[cols];
 
@@ -412,7 +423,7 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int *outR
     
     int **outB = new int *[outRows];
     for (int i = 0; i < outRows; i++)
-        outB[i] = new int[outCols];
+        outB[i] = new int[outCols];*/
 
     printf("%d-*-* \n", rows);
     printf("%d-*-* \n", cols);

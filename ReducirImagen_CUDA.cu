@@ -15,8 +15,8 @@ int BLOCKSPERGRID  = 16;
 int NUMTHREADS = 64;
 
 int *outR;
-int **outG;
-int **outB;
+int *outG;
+int *outB;
 int *imgR;
 int *imgG;
 int *imgB;
@@ -382,7 +382,7 @@ __device__ int CalPosicion(int i, int j, int numCol){
     return (numCol*i) + j;
 }
 
-__global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int numeroColumnasImg, int NUMTHREADS, int rows, int cols, int outRows, int outCols)
+__global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *outG, int *outB, int numeroColumnasImg, int NUMTHREADS, int rows, int cols, int outRows, int outCols)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;   
     
@@ -435,8 +435,8 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int num
                         //outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
                         //outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
                         outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = R2x2[k][l];
-                        //outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = G2x2[k][l];
-                        //outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B2x2[k][l];
+                        outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = G2x2[k][l];
+                        outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B2x2[k][l];
                     }
                 }
             }
@@ -452,6 +452,27 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int num
         }
         printf("-----\n");
     }
+    printf("*******\n");
+
+    index = 0;
+    for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", outG[index]);
+            index++;
+        }
+        printf("-----\n");
+    }
+    printf("*******\n");
+
+    index = 0;
+    for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", outB[index]);
+            index++;
+        }
+        printf("-----\n");
+    }
+    printf("*******\n");
 
 }
 
@@ -656,11 +677,14 @@ int main(int argc, char **argv)
     Mat imgOut(outRows, outCols, CV_8UC3);
 
     int sizeImagenesOut = outRows*outCols*sizeof(int);
+
     outR = (int *)malloc(sizeImagenesOut); 
+    outG = (int *)malloc(sizeImagenesOut); 
+    outB = (int *)malloc(sizeImagenesOut); 
 
     /*outR = new int *[outRows];
     for (size_t i = 0; i < outRows; ++i)
-        outR[i] = new int[outCols];*/
+        outR[i] = new int[outCols];
 
     outG = new int *[outRows];
     for (size_t i = 0; i < outRows; ++i)
@@ -668,7 +692,7 @@ int main(int argc, char **argv)
 
     outB = new int *[outRows];
     for (size_t i = 0; i < outRows; ++i)
-        outB[i] = new int[outCols];
+        outB[i] = new int[outCols];*/
 
     // Fin creación de matrices
 
@@ -717,22 +741,20 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to allocate device matriz d_outR (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-
-    /*
-    err = cudaMalloc((void **)&d_outG, sizeOut);
+    err = cudaMalloc((void **)&d_outG, sizeImagenesOut);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to allocate device matriz d_outG (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMalloc((void **)&d_outB, sizeOut);
+    err = cudaMalloc((void **)&d_outB, sizeImagenesOut);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to allocate device matriz d_outB (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-    */
+    
 
     err = cudaMalloc((void **)&d_numeroColumnasImg, sizeEntero);
     if (err != cudaSuccess)
@@ -806,7 +828,19 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "Failed to copy matriz outR from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
+    }
+    err = cudaMemcpy(d_outG, outG, sizeImagenesOut, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matriz outG from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
     }  
+    err = cudaMemcpy(d_outB, outB, sizeImagenesOut, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matriz outB from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }    
 
     err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeEntero, cudaMemcpyHostToDevice);
     if (err != cudaSuccess)
@@ -857,7 +891,7 @@ int main(int argc, char **argv)
 
     BLOCKSPERGRID=1; //quitar
     NUMTHREADSPerBlock=1; //quitar
-    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
+    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
 
 
     err = cudaGetLastError();
@@ -892,7 +926,7 @@ int main(int argc, char **argv)
     */
 
     // Cleanup
-    err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB); cudaFree(d_outR); /*cudaFree(d_outG); cudaFree(d_outB);*/ cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS); cudaFree(d_rows); cudaFree(d_cols); cudaFree(d_outRows); cudaFree(d_outCols);
+    err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB); cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS); cudaFree(d_rows); cudaFree(d_cols); cudaFree(d_outRows); cudaFree(d_outCols);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to free device matrix d_imgR (error code %s)!\n", cudaGetErrorString(err));
@@ -980,8 +1014,8 @@ int main(int argc, char **argv)
     {
         for (int j = 0; j < outCols; j++)
         {
-            imgOut.at<cv::Vec3b>(i, j)[0] = outB[i][j];
-            imgOut.at<cv::Vec3b>(i, j)[1] = outG[i][j];
+            imgOut.at<cv::Vec3b>(i, j)[0] = outB[index];
+            imgOut.at<cv::Vec3b>(i, j)[1] = outG[index];
             imgOut.at<cv::Vec3b>(i, j)[2] = outR[index];
             index++;
         }
@@ -994,6 +1028,8 @@ int main(int argc, char **argv)
     free(imgB);
 
     free(outR);
+    free(outG);
+    free(outB);
     //free(imgB);
     /*for (size_t i = 0; i < rows; ++i)
         delete imgR[i];
@@ -1009,7 +1045,7 @@ int main(int argc, char **argv)
 
     for (size_t i = 0; i < outRows; ++i)
         delete outR[i];
-    delete outR;*/
+    delete outR;
 
     for (size_t i = 0; i < outRows; ++i)
         delete outG[i];
@@ -1017,7 +1053,7 @@ int main(int argc, char **argv)
 
     for (size_t i = 0; i < outRows; ++i)
         delete outB[i];
-    delete outB;
+    delete outB;*/
 
     //Fin Borrar matrices
 

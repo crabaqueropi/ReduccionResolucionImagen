@@ -385,7 +385,6 @@ __device__ int CalPosicion(int i, int j, int numCol){
 __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *outG, int *outB, int numeroColumnasImg, int NUMTHREADS, int rows, int cols, int outRows, int outCols)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;   
-    printf("* %d\n", threadId);
     
     /*printf("* %d\n", numeroColumnasImg);
     printf("* %d\n", NUMTHREADS);
@@ -863,7 +862,7 @@ int main(int argc, char **argv)
     // Launch add() kernel on GPU with N blocks
 
 
-    BLOCKSPERGRID=32; //quitar
+    BLOCKSPERGRID=4; //quitar
     NUMTHREADSPerBlock=4; //quitar
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
 

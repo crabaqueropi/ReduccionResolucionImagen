@@ -387,6 +387,7 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int numeroColumnasImg, 
     printf("* %d\n", outRowsAux);
     printf("* %d\n", outColsAux);*/
 
+    /*
     int **imgR;
     int **imgG;
     //int **imgB;
@@ -398,19 +399,27 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int numeroColumnasImg, 
         imgR[i] = new int[colsAux];
         //-->imgG[i] = new int[colsAux];
         //imgB[i] = new int[colsAux];
-    }
+    }*/
 
     int index = 0;
-    for(int i = 0; i<rowsAux;i++){
-        for(int j = 0; j<colsAux;j++){
-            imgR[i][j]= imgRAux[index];
-            //imgG[i][j]= imgGAux[index];
-            //imgB[i][j]= imgBAux[index];
+    for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", imgRAux[index]);
             index++;
         }
+        printf("-----\n");
     }
 
+    index = 0;
     for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", imgGAux[index]);
+            index++;
+        }
+        printf("-----\n");
+    }
+
+    /*for(int i = 0; i<10;i++){
         for(int j = 0; j<10;j++){
             printf("%d  ", imgR[i][j]);
         }

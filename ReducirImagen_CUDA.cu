@@ -434,12 +434,9 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
                         //outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
                         //outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
                         //outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
-                        /*outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = R2x2[k][l];
+                        outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = R2x2[k][l];
                         outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = G2x2[k][l];
-                        outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B2x2[k][l];*/
-                        outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = 255;
-                        outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = 255;
-                        outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = 255;
+                        outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B2x2[k][l];
                     }
                 }
             }

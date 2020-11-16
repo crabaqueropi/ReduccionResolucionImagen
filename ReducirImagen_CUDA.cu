@@ -447,48 +447,6 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     }else{
     } 
 
-    int index = 0;
-    for (int k = 0; k < outRows; k++)
-    {
-        for (int l = 0; l <outCols; l++)
-        {
-            outR[index] = 255;
-            outG[index] = 255;
-            outB[index] = 255;
-            index++;
-        }
-    }
-
-    index = 0;
-    for(int i = outRows/2; i<(outRows/2)+20;i++){
-        for(int j = outCols/2; j<(outCols/2)+20;j++){
-            printf("%d  ", outR[index]);
-            index++;
-        }
-        printf("-----\n");
-    }
-    printf("*******\n");
-
-    index = 0;
-    for(int i = outRows/2; i<(outRows/2)+20;i++){
-        for(int j = outCols/2; j<(outCols/2)+20;j++){
-            printf("%d  ", outG[index]);
-            index++;
-        }
-        printf("-----\n");
-    }
-    printf("*******\n");
-
-    index = 0;
-    for(int i = outRows/2; i<(outRows/2)+20;i++){
-        for(int j = outCols/2; j<(outCols/2)+20;j++){
-            printf("%d  ", outB[index]);
-            index++;
-        }
-        printf("-----\n");
-    }
-    printf("*******\n");
-
 }
 
 /*
@@ -904,8 +862,8 @@ int main(int argc, char **argv)
     // Launch add() kernel on GPU with N blocks
 
 
-    BLOCKSPERGRID=1; //quitar
-    NUMTHREADSPerBlock=1; //quitar
+    BLOCKSPERGRID=32; //quitar
+    NUMTHREADSPerBlock=4; //quitar
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
 
 

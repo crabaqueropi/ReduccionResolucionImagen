@@ -445,8 +445,8 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     } 
 
     int index = 0;
-    for(int i = outRows-10; i<outRows;i++){
-        for(int j = outCols-10; j<outCols;j++){
+    for(int i = outRows/2; i<(outRows/2)+20;i++){
+        for(int j = outCols/2; j<(outCols/2)+20;j++){
             printf("%d  ", outR[index]);
             index++;
         }
@@ -455,8 +455,8 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     printf("*******\n");
 
     index = 0;
-    for(int i = outRows-10; i<outRows;i++){
-        for(int j = outCols-10; j<outCols;j++){
+    for(int i = outRows/2; i<(outRows/2)+20;i++){
+        for(int j = outCols/2; j<(outCols/2)+20;j++){
             printf("%d  ", outG[index]);
             index++;
         }
@@ -465,8 +465,8 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     printf("*******\n");
 
     index = 0;
-    for(int i = outRows-10; i<outRows;i++){
-        for(int j = outCols-10; j<outCols;j++){
+    for(int i = outRows/2; i<(outRows/2)+20;i++){
+        for(int j = outCols/2; j<(outCols/2)+20;j++){
             printf("%d  ", outB[index]);
             index++;
         }
@@ -937,8 +937,8 @@ int main(int argc, char **argv)
     //************************** CUDA **********************************
 
     index = 0;
-    for(int i = outRows-10; i<outRows;i++){
-        for(int j = outCols-10; j<outCols;j++){
+    for(int i = outRows/2; i<(outRows/2)+20;i++){
+        for(int j = outCols/2; j<(outCols/2)+20;j++){
             printf("%d  ", outR[index]);
             index++;
         }
@@ -947,8 +947,8 @@ int main(int argc, char **argv)
     printf("*******\n");
 
     index = 0;
-    for(int i = outRows-10; i<outRows;i++){
-        for(int j = outCols-10; j<outCols;j++){
+    for(int i = outRows/2; i<(outRows/2)+20;i++){
+        for(int j = outCols/2; j<(outCols/2)+20;j++){
             printf("%d  ", outG[index]);
             index++;
         }
@@ -957,8 +957,8 @@ int main(int argc, char **argv)
     printf("*******\n");
 
     index = 0;
-    for(int i = outRows-10; i<outRows;i++){
-        for(int j = outCols-10; j<outCols;j++){
+    for(int i = outRows/2; i<(outRows/2)+20;i++){
+        for(int j = outCols/2; j<(outCols/2)+20;j++){
             printf("%d  ", outB[index]);
             index++;
         }

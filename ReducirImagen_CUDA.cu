@@ -860,7 +860,7 @@ int main(int argc, char **argv)
 
 
     BLOCKSPERGRID=1; //quitar
-    NUMTHREADSPerBlock=6; //quitar
+    NUMTHREADSPerBlock=4; //quitar
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
 
 

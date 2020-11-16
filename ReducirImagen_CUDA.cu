@@ -14,9 +14,11 @@ using namespace cv;
 int BLOCKSPERGRID  = 16;
 int NUMTHREADS = 64;
 
-int **outR;
+int *outR;
 int **outG;
 int **outB;
+int *imgR;
+int *imgG;
 int *imgB;
 int numeroColumnasImg = 0;
 
@@ -380,25 +382,26 @@ __device__ int CalPosicion(int i, int j, int numCol){
     return (numCol*i) + j;
 }
 
-__global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int numeroColumnasImg, int NUMTHREADS, int rowsAux, int colsAux, int outRowsAux, int outColsAux)
+__global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int numeroColumnasImg, int NUMTHREADS, int rows, int cols, int outRows, int outCols)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;   
     
-    printf("* %d\n", numeroColumnasImg);
+    /*printf("* %d\n", numeroColumnasImg);
     printf("* %d\n", NUMTHREADS);
     printf("* %d\n", rowsAux);
     printf("* %d\n", colsAux);
     printf("* %d\n", outRowsAux);
-    printf("* %d\n", outColsAux);
+    printf("* %d\n", outColsAux);*/
 
-    /*if (*NUMTHREADS<=240){
+    if (NUMTHREADS<=240){
+
         int filaInicial, filaFinal; //, threadId = *(int *)args;
         int numeroFilasImg = 240; // 720/3
-        filaInicial = (numeroFilasImg / *NUMTHREADS) * threadId;
-        filaFinal = filaInicial + ((numeroFilasImg / *NUMTHREADS) - 1);
+        filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
+        filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
         for (int i = filaInicial; i <= filaFinal; i++)
         {
-            for (int j = 0; j < *numeroColumnasImg; j++)
+            for (int j = 0; j < numeroColumnasImg; j++)
             {
                 int R3x3[3][3];
                 int G3x3[3][3];
@@ -409,18 +412,18 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int numer
                 {
                     for (int l = 0; l < 3; l++)
                     {
-                        printf("-----\n");
-                        R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
-                        printf("%d", imgR[0][0]);
-                        G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
-                        B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                        //R3x3[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        //G3x3[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        //B3x3[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                        R3x3[k][l] = imgR[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        G3x3[k][l] = imgG[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        B3x3[k][l] = imgB[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
                     }
                 }
                 int R2x2[2][2];
                 int G2x2[2][2];
                 int B2x2[2][2];
                 
-                printf("Entro al For\n");
                 reducirMatriz3x3a2x2(R3x3, G3x3, B3x3, R2x2, G2x2, B2x2);
                 int indexFilaActualOUT = (i * 2);
                 int indexColumnaActualOUT = (j * 2);
@@ -428,15 +431,28 @@ __global__ void reduccion720(int *imgRAux, int *imgGAux, int *imgBAux, int numer
                 {
                     for (int l = 0; l < 2; l++)
                     {
-                        outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
-                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
-                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                        //outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
+                        //outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
+                        //outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                        outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = R2x2[k][l];
+                        //outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = G2x2[k][l];
+                        //outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B2x2[k][l];
                     }
                 }
             }
         }
     }else{
-    } */
+    } 
+
+    int index = 0;
+    for(int i = 0; i<10;i++){
+        for(int j = 0; j<10;j++){
+            printf("%d  ", outR[index]);
+            index++;
+        }
+        printf("-----\n");
+    }
+
 }
 
 /*
@@ -604,9 +620,6 @@ int main(int argc, char **argv)
 
     int sizeImagenes = rows*cols*sizeof(int);
 
-    int *imgR;
-    int *imgG;
-
     imgR = (int *)malloc(sizeImagenes); 
     imgG = (int *)malloc(sizeImagenes); 
     imgB = (int *)malloc(sizeImagenes); 
@@ -642,9 +655,12 @@ int main(int argc, char **argv)
     // Output image
     Mat imgOut(outRows, outCols, CV_8UC3);
 
-    outR = new int *[outRows];
+    int sizeImagenesOut = outRows*outCols*sizeof(int);
+    outR = (int *)malloc(sizeImagenesOut); 
+
+    /*outR = new int *[outRows];
     for (size_t i = 0; i < outRows; ++i)
-        outR[i] = new int[outCols];
+        outR[i] = new int[outCols];*/
 
     outG = new int *[outRows];
     for (size_t i = 0; i < outRows; ++i)
@@ -657,24 +673,6 @@ int main(int argc, char **argv)
     // Fin creación de matrices
 
     //************************** CUDA **********************************
-    int matriz [3][3] = {{1,2,3},{4,5,6},{7,8,9}};
-    int *a;
-    int *d_a;
-    int size = 3*3*sizeof(int);
-
-    cudaMalloc((void **)&d_a, size);
-    a = (int *)malloc(size); 
-
-    index = 0;
-    for(int i = 0; i<3;i++){
-        for(int j = 0; j<3;j++){
-            a[index]=matriz[i][j];
-            index++;
-        }
-    }
-
-    cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-
     int *d_imgR;
     int *d_imgG;
     int *d_imgB;
@@ -712,14 +710,15 @@ int main(int argc, char **argv)
     }
 
 
-    /*
-    err = cudaMalloc((void **)&d_outR, sizeOut);
+    
+    err = cudaMalloc((void **)&d_outR, sizeImagenesOut);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to allocate device matriz d_outR (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
+    /*
     err = cudaMalloc((void **)&d_outG, sizeOut);
     if (err != cudaSuccess)
     {
@@ -800,7 +799,14 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to copy matriz imgB from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-  
+
+
+    err = cudaMemcpy(d_outR, outR, sizeImagenesOut, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "Failed to copy matriz outR from host to device (error code %s)!\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }  
 
     err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeEntero, cudaMemcpyHostToDevice);
     if (err != cudaSuccess)
@@ -851,9 +857,7 @@ int main(int argc, char **argv)
 
     BLOCKSPERGRID=1; //quitar
     NUMTHREADSPerBlock=1; //quitar
-    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
-    free(a);
-    cudaFree(d_a);
+    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
 
 
     err = cudaGetLastError();
@@ -888,7 +892,7 @@ int main(int argc, char **argv)
     */
 
     // Cleanup
-    err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB); /*cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB);*/ cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS); cudaFree(d_rows); cudaFree(d_cols); cudaFree(d_outRows); cudaFree(d_outCols);
+    err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB); cudaFree(d_outR); /*cudaFree(d_outG); cudaFree(d_outB);*/ cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS); cudaFree(d_rows); cudaFree(d_cols); cudaFree(d_outRows); cudaFree(d_outCols);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to free device matrix d_imgR (error code %s)!\n", cudaGetErrorString(err));
@@ -971,13 +975,15 @@ int main(int argc, char **argv)
     //cout<<outB[0][0]<<endl;
     //cout<<outB[15][40]<<endl;
 
+    index = 0;
     for (int i = 0; i < outRows; i++)
     {
         for (int j = 0; j < outCols; j++)
         {
             imgOut.at<cv::Vec3b>(i, j)[0] = outB[i][j];
             imgOut.at<cv::Vec3b>(i, j)[1] = outG[i][j];
-            imgOut.at<cv::Vec3b>(i, j)[2] = outR[i][j];
+            imgOut.at<cv::Vec3b>(i, j)[2] = outR[index];
+            index++;
         }
     }
     //Fin Pasar matrices resultantes a Imagen de salida
@@ -985,6 +991,9 @@ int main(int argc, char **argv)
     //Inicio borrar matrices
     free(imgR);
     free(imgG);
+    free(imgB);
+
+    free(outR);
     //free(imgB);
     /*for (size_t i = 0; i < rows; ++i)
         delete imgR[i];
@@ -996,11 +1005,11 @@ int main(int argc, char **argv)
 
     for (size_t i = 0; i < rows; ++i)
         delete imgB[i];
-    delete imgB;*/
+    delete imgB;
 
     for (size_t i = 0; i < outRows; ++i)
         delete outR[i];
-    delete outR;
+    delete outR;*/
 
     for (size_t i = 0; i < outRows; ++i)
         delete outG[i];

@@ -862,8 +862,8 @@ int main(int argc, char **argv)
     // Launch add() kernel on GPU with N blocks
 
 
-    BLOCKSPERGRID=4; //quitar
-    NUMTHREADSPerBlock=4; //quitar
+    BLOCKSPERGRID=1; //quitar
+    NUMTHREADSPerBlock=1; //quitar
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
 
 

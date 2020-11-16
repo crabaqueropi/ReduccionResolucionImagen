@@ -786,8 +786,8 @@ int main(int argc, char **argv)
     NUMTHREADS = 4; //NUMTHREADSPerBlock;
     // Launch add() kernel on GPU with N blocks
 
-    BLOCKSPERGRID=5; //quitar
-    NUMTHREADSPerBlock=6; //quitar
+    BLOCKSPERGRID=1; //quitar
+    NUMTHREADSPerBlock=4; //quitar
 
 
     // Copy inputs to device

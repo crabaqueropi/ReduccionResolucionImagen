@@ -448,6 +448,18 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     } 
 
     int index = 0;
+    for (int k = 0; k < outRows; k++)
+    {
+        for (int l = 0; l <outCols; l++)
+        {
+            outR[index] = 255;
+            outG[index] = 255;
+            outB[index] = 255;
+            index++;
+        }
+    }
+
+    index = 0;
     for(int i = outRows/2; i<(outRows/2)+20;i++){
         for(int j = outCols/2; j<(outCols/2)+20;j++){
             printf("%d  ", outR[index]);

@@ -902,28 +902,28 @@ int main(int argc, char **argv)
     }
 
     // Copy result back to host
-    /*
-    err = cudaMemcpy(outR, d_outR, sizeOut, cudaMemcpyDeviceToHost);
+    
+    err = cudaMemcpy(outR, d_outR, sizeImagenesOut, cudaMemcpyDeviceToHost);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to copy matrix d_outR from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMemcpy(outG, d_outG, sizeOut, cudaMemcpyDeviceToHost);
+    err = cudaMemcpy(outG, d_outG, sizeImagenesOut, cudaMemcpyDeviceToHost);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to copy matrix d_outG from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
 
-    err = cudaMemcpy(outB, d_outB, sizeOut, cudaMemcpyDeviceToHost);
+    err = cudaMemcpy(outB, d_outB, sizeImagenesOut, cudaMemcpyDeviceToHost);
     if (err != cudaSuccess)
     {
         fprintf(stderr, "Failed to copy matrix d_outB from device to host (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-    */
+    
 
     // Cleanup
     err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB); cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS); cudaFree(d_rows); cudaFree(d_cols); cudaFree(d_outRows); cudaFree(d_outCols);

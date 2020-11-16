@@ -385,6 +385,7 @@ __device__ int CalPosicion(int i, int j, int numCol){
 __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *outG, int *outB, int numeroColumnasImg, int NUMTHREADS, int rows, int cols, int outRows, int outCols)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;   
+    printf("* %d\n", threadId);
     
     /*printf("* %d\n", numeroColumnasImg);
     printf("* %d\n", NUMTHREADS);

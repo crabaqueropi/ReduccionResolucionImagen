@@ -794,11 +794,10 @@ int main(int argc, char **argv)
 
     //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
     int NUMTHREADSPerBlock = 4;
-    NUMTHREADS = 4; //NUMTHREADSPerBlock;
-    // Launch add() kernel on GPU with N blocks
-
-    BLOCKSPERGRID=1; //quitar
-    NUMTHREADSPerBlock=4; //quitar
+    
+    NUMTHREADS = 30; //NUMTHREADSPerBlock;
+    BLOCKSPERGRID=5; //quitar
+    NUMTHREADSPerBlock=6; //quitar
 
 
     // Copy inputs to device

@@ -445,8 +445,8 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     } 
 
     int index = 0;
-    for(int i = 0; i<10;i++){
-        for(int j = 0; j<10;j++){
+    for(int i = outRows-10; i<outRows;i++){
+        for(int j = outCols-10; j<outCols;j++){
             printf("%d  ", outR[index]);
             index++;
         }
@@ -455,8 +455,8 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     printf("*******\n");
 
     index = 0;
-    for(int i = 0; i<10;i++){
-        for(int j = 0; j<10;j++){
+    for(int i = outRows-10; i<outRows;i++){
+        for(int j = outCols-10; j<outCols;j++){
             printf("%d  ", outG[index]);
             index++;
         }
@@ -465,8 +465,8 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     printf("*******\n");
 
     index = 0;
-    for(int i = 0; i<10;i++){
-        for(int j = 0; j<10;j++){
+    for(int i = outRows-10; i<outRows;i++){
+        for(int j = outCols-10; j<outCols;j++){
             printf("%d  ", outB[index]);
             index++;
         }
@@ -935,6 +935,36 @@ int main(int argc, char **argv)
 
 
     //************************** CUDA **********************************
+
+    index = 0;
+    for(int i = outRows-10; i<outRows;i++){
+        for(int j = outCols-10; j<outCols;j++){
+            printf("%d  ", outR[index]);
+            index++;
+        }
+        printf("-----\n");
+    }
+    printf("*******\n");
+
+    index = 0;
+    for(int i = outRows-10; i<outRows;i++){
+        for(int j = outCols-10; j<outCols;j++){
+            printf("%d  ", outG[index]);
+            index++;
+        }
+        printf("-----\n");
+    }
+    printf("*******\n");
+
+    index = 0;
+    for(int i = outRows-10; i<outRows;i++){
+        for(int j = outCols-10; j<outCols;j++){
+            printf("%d  ", outB[index]);
+            index++;
+        }
+        printf("-----\n");
+    }
+    printf("*******\n");
 
 
     /*

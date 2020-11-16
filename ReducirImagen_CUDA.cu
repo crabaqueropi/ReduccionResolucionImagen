@@ -795,9 +795,10 @@ int main(int argc, char **argv)
     //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
     int NUMTHREADSPerBlock = 4;
     
-    NUMTHREADS = 30; //NUMTHREADSPerBlock;
-    BLOCKSPERGRID=5; //quitar
-    NUMTHREADSPerBlock=6; //quitar
+    
+    BLOCKSPERGRID=30; //quitar
+    NUMTHREADSPerBlock=4; //quitar
+    NUMTHREADS = BLOCKSPERGRID*NUMTHREADSPerBlock; //NUMTHREADSPerBlock;
 
 
     // Copy inputs to device

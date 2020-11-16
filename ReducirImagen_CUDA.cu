@@ -22,7 +22,7 @@ int *imgG;
 int *imgB;
 int numeroColumnasImg = 0;
 
-void matriz4x4Amatriz2x2(int imgR[4][4], int imgG[4][4], int imgB[4][4], int outR[2][2], int outG[2][2], int outB[2][2])
+__device__ void matriz4x4Amatriz2x2(int imgR[4][4], int imgG[4][4], int imgB[4][4], int outR[2][2], int outG[2][2], int outB[2][2])
 { // recibo una matríz cuadrada con numero par de filas (nxn)
     /*cuadrantes
     --- ---
@@ -95,7 +95,7 @@ void matriz4x4Amatriz2x2(int imgR[4][4], int imgG[4][4], int imgB[4][4], int out
     outB[1][1] = cuadrante4B / divisor;
 }
 
-void algoritmo2Para4K(int imgR[8][8], int imgG[8][8], int imgB[8][8], int outR[2][2], int outG[2][2], int outB[2][2])
+__device__ void algoritmo2Para4K(int imgR[8][8], int imgG[8][8], int imgB[8][8], int outR[2][2], int outG[2][2], int outB[2][2])
 { // recibo una matríz cuadrada con numero par de filas (nxn)
     /*cuadrantes
     --- ---
@@ -168,7 +168,7 @@ void algoritmo2Para4K(int imgR[8][8], int imgG[8][8], int imgB[8][8], int outR[2
     outB[1][1] = cuadrante4B / divisor;
 }
 
-void algoritmo2Para1080p(int imgR[8][8], int imgG[8][8], int imgB[8][8], int outR[4][4], int outG[4][4], int outB[4][4])
+__device__ void algoritmo2Para1080p(int imgR[8][8], int imgG[8][8], int imgB[8][8], int outR[4][4], int outG[4][4], int outB[4][4])
 { // recibo matriz de 8x8 y tamaño de matriz resultante (nxn)
     int subMatriz1R[4][4];
     int subMatriz2R[4][4];
@@ -312,7 +312,7 @@ __device__ void reducirMatriz3x3a2x2(int imgR[3][3], int imgG[3][3], int imgB[3]
     }
 }
 
-void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[4][4], int outG[4][4], int outB[4][4])
+__device__ void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[4][4], int outG[4][4], int outB[4][4])
 {
     double R[9][9];
     double G[9][9];
@@ -345,7 +345,7 @@ void reducirMatriz9x9a4x4(int imgR[9][9], int imgG[9][9], int imgB[9][9], int ou
     algoritmo2Para1080p(R8x8, G8x8, B8x8, outR, outG, outB);
 }
 
-void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[2][2], int outG[2][2], int outB[2][2])
+__device__ void reducirMatriz9x9a2x2(int imgR[9][9], int imgG[9][9], int imgB[9][9], int outR[2][2], int outG[2][2], int outB[2][2])
 {
     double R[9][9];
     double G[9][9];
@@ -446,59 +446,71 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
 
 }
 
-/*
-void *reduccion1080(void *args)
+
+__global__ void reduccion1080(int *imgR, int *imgG, int *imgB, int *outR, int *outG, int *outB, int numeroColumnasImg, int NUMTHREADS, int rows, int cols, int outRows, int outCols)
 {
-    int filaInicial, filaFinal, threadId = *(int *)args;
+    int threadId = threadIdx.x + blockIdx.x * blockDim.x; 
 
-    int numeroFilasImg = 120; // 1080/9
+    if (NUMTHREADS<=120){
+        int filaInicial, filaFinal;
 
-    filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
-    filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
+        int numeroFilasImg = 120; // 1080/9
 
-    for (int i = filaInicial; i <= filaFinal; i++)
-    {
-        for (int j = 0; j < numeroColumnasImg; j++)
+        filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
+        filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
+
+        for (int i = filaInicial; i <= filaFinal; i++)
         {
-            int R9x9[9][9];
-            int G9x9[9][9];
-            int B9x9[9][9];
-
-            int indexFilaActual = (i * 9);
-            int indexColumnaActual = (j * 9);
-
-            for (int k = 0; k < 9; k++)
+            for (int j = 0; j < numeroColumnasImg; j++)
             {
-                for (int l = 0; l < 9; l++)
+                int R9x9[9][9];
+                int G9x9[9][9];
+                int B9x9[9][9];
+
+                int indexFilaActual = (i * 9);
+                int indexColumnaActual = (j * 9);
+
+                for (int k = 0; k < 9; k++)
                 {
-                    R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
-                    G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
-                    B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                    for (int l = 0; l < 9; l++)
+                    {
+                        //R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        //G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        //B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                        R9x9[k][l] = imgR[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        G9x9[k][l] = imgG[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        B9x9[k][l] = imgB[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                    }
                 }
-            }
 
-            int R4x4[4][4];
-            int G4x4[4][4];
-            int B4x4[4][4];
+                int R4x4[4][4];
+                int G4x4[4][4];
+                int B4x4[4][4];
 
-            reducirMatriz9x9a4x4(R9x9, G9x9, B9x9, R4x4, G4x4, B4x4);
+                reducirMatriz9x9a4x4(R9x9, G9x9, B9x9, R4x4, G4x4, B4x4);
 
-            int indexFilaActualOUT = (i * 4);
-            int indexColumnaActualOUT = (j * 4);
+                int indexFilaActualOUT = (i * 4);
+                int indexColumnaActualOUT = (j * 4);
 
-            for (int k = 0; k < 4; k++)
-            {
-                for (int l = 0; l < 4; l++)
+                for (int k = 0; k < 4; k++)
                 {
-                    outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R4x4[k][l];
-                    outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G4x4[k][l];
-                    outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B4x4[k][l];
+                    for (int l = 0; l < 4; l++)
+                    {
+                        /* outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R4x4[k][l];
+                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G4x4[k][l];
+                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B4x4[k][l]; */
+                        outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = R4x4[k][l];
+                        outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = G4x4[k][l];
+                        outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B4x4[k][l];
+                    }
                 }
             }
         }
+    }else{
     }
 }
 
+/*
 void *reduccion4k(void *args)
 {
     int filaInicial, filaFinal, threadId = *(int *)args;
@@ -560,8 +572,8 @@ int main(int argc, char **argv)
     char* nombreSalida = argv[2];
     NUMTHREADS = atoi(argv[3]); */
 
-    string nombreEntrada = "imagen720p.jpg";
-    string nombreSalida = "imagen720-a480CUDAAAAAAA.jpg";
+    string nombreEntrada = "imagen1080p.jpg";
+    string nombreSalida = "imagen1080p-a480CUDAAAAAAA.jpg";
 
     //ofstream file;
 
@@ -768,7 +780,14 @@ int main(int argc, char **argv)
     }
 
 
-    numeroColumnasImg = cols / 3;
+
+    //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
+    int NUMTHREADSPerBlock = 4;
+    NUMTHREADS = 4; //NUMTHREADSPerBlock;
+    // Launch add() kernel on GPU with N blocks
+
+    BLOCKSPERGRID=1; //quitar
+    NUMTHREADSPerBlock=4; //quitar
 
 
     // Copy inputs to device
@@ -812,13 +831,6 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }    
 
-    err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeEntero, cudaMemcpyHostToDevice);
-    if (err != cudaSuccess)
-    {
-        fprintf(stderr, "Failed to copy valor numeroColumnasImg from host to device (error code %s)!\n", cudaGetErrorString(err));
-        exit(EXIT_FAILURE);
-    }
-
     err = cudaMemcpy(d_NUMTHREADS, &NUMTHREADS, sizeEntero, cudaMemcpyHostToDevice);
     if (err != cudaSuccess)
     {
@@ -853,16 +865,43 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
-    int NUMTHREADSPerBlock = 4;
-    NUMTHREADS = 4; //NUMTHREADSPerBlock;
-    // Launch add() kernel on GPU with N blocks
-
-
-    BLOCKSPERGRID=5; //quitar
-    NUMTHREADSPerBlock=6; //quitar
-    reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
-    cudaDeviceSynchronize();
+    //Inicio Conversión**********************************
+    if (rows == 720)
+    {
+        numeroColumnasImg = cols / 3;
+        err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeEntero, cudaMemcpyHostToDevice);
+        if (err != cudaSuccess)
+        {
+            fprintf(stderr, "Failed to copy valor numeroColumnasImg from host to device (error code %s)!\n", cudaGetErrorString(err));
+            exit(EXIT_FAILURE);
+        }
+        reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
+    }
+    else if (rows == 1080)
+    {
+        numeroColumnasImg = cols / 9;
+        err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeEntero, cudaMemcpyHostToDevice);
+        if (err != cudaSuccess)
+        {
+            fprintf(stderr, "Failed to copy valor numeroColumnasImg from host to device (error code %s)!\n", cudaGetErrorString(err));
+            exit(EXIT_FAILURE);
+        }
+        reduccion1080<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
+    }
+    /*else if (rows == 2160)
+    {
+        numeroColumnasImg = cols / 9;
+        for (i = 0; i < NUMTHREADS; i++)
+        {
+            threadId[i] = i;
+            pthread_create(&thread[i], NULL, reduccion4k, &threadId[i]);
+        }
+    }*/
+    else
+    {
+        cout << "Resolución no permitida" << endl;
+    }
+    //Fin Conversión*******************
 
 
     err = cudaGetLastError();
@@ -895,7 +934,6 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
     
-
     // Cleanup
     err = cudaFree(d_imgR); cudaFree(d_imgG); cudaFree(d_imgB); cudaFree(d_outR); cudaFree(d_outG); cudaFree(d_outB); cudaFree(d_numeroColumnasImg); cudaFree(d_NUMTHREADS); cudaFree(d_rows); cudaFree(d_cols); cudaFree(d_outRows); cudaFree(d_outCols);
     if (err != cudaSuccess)
@@ -907,48 +945,7 @@ int main(int argc, char **argv)
 
     //************************** CUDA **********************************
 
-
     /*
-    //Inicio Conversión**********************************
-    int numeroFilasImg = 0;
-    //  Creación hilos y empezar toma de tiempo
-    int threadId[NUMTHREADS], i, *retval;
-    pthread_t thread[NUMTHREADS];
-    struct timeval tval_before, tval_after, tval_result;
-    gettimeofday(&tval_before, NULL);
-    //  **************
-    if (rows == 720)
-    {
-        numeroColumnasImg = cols / 3;
-        for (i = 0; i < NUMTHREADS; i++)
-        {
-            threadId[i] = i;
-            pthread_create(&thread[i], NULL, reduccion720, &threadId[i]);
-        }
-    }
-    else if (rows == 1080)
-    {
-        numeroColumnasImg = cols / 9;
-        for (i = 0; i < NUMTHREADS; i++)
-        {
-            threadId[i] = i;
-            pthread_create(&thread[i], NULL, reduccion1080, &threadId[i]);
-        }
-    }
-    else if (rows == 2160)
-    {
-        numeroColumnasImg = cols / 9;
-        for (i = 0; i < NUMTHREADS; i++)
-        {
-            threadId[i] = i;
-            pthread_create(&thread[i], NULL, reduccion4k, &threadId[i]);
-        }
-    }
-    else
-    {
-        cout << "Resolución no permitida" << endl;
-    }
-    //Fin Conversión*******************
     //Recolección Hilos y finalización toma de tiempo
     for (i = 0; i < NUMTHREADS; i++)
     {

@@ -510,58 +510,69 @@ __global__ void reduccion1080(int *imgR, int *imgG, int *imgB, int *outR, int *o
     }
 }
 
-/*
-void *reduccion4k(void *args)
+
+__global__ void reduccion4k(int *imgR, int *imgG, int *imgB, int *outR, int *outG, int *outB, int numeroColumnasImg, int NUMTHREADS, int rows, int cols, int outRows, int outCols)
 {
-    int filaInicial, filaFinal, threadId = *(int *)args;
+    int threadId = threadIdx.x + blockIdx.x * blockDim.x; 
 
-    int numeroFilasImg = 240; // 2160/9
-    filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
-    filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
+    if (NUMTHREADS<=240){
+        int filaInicial, filaFinal;
 
-    for (int i = filaInicial; i <= filaFinal; i++)
-    {
-        for (int j = 0; j < numeroColumnasImg; j++)
+        int numeroFilasImg = 240; // 2160/9
+        filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
+        filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
+
+        for (int i = filaInicial; i <= filaFinal; i++)
         {
-            int R9x9[9][9];
-            int G9x9[9][9];
-            int B9x9[9][9];
-
-            int indexFilaActual = (i * 9);
-            int indexColumnaActual = (j * 9);
-
-            for (int k = 0; k < 9; k++)
+            for (int j = 0; j < numeroColumnasImg; j++)
             {
-                for (int l = 0; l < 9; l++)
+                int R9x9[9][9];
+                int G9x9[9][9];
+                int B9x9[9][9];
+
+                int indexFilaActual = (i * 9);
+                int indexColumnaActual = (j * 9);
+
+                for (int k = 0; k < 9; k++)
                 {
-                    R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
-                    G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
-                    B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                    for (int l = 0; l < 9; l++)
+                    {
+                        /* R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l]; */
+                        R9x9[k][l] = imgR[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        G9x9[k][l] = imgG[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        B9x9[k][l] = imgB[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                    }
                 }
-            }
 
-            int R2x2[2][2];
-            int G2x2[2][2];
-            int B2x2[2][2];
+                int R2x2[2][2];
+                int G2x2[2][2];
+                int B2x2[2][2];
 
-            reducirMatriz9x9a2x2(R9x9, G9x9, B9x9, R2x2, G2x2, B2x2);
+                reducirMatriz9x9a2x2(R9x9, G9x9, B9x9, R2x2, G2x2, B2x2);
 
-            int indexFilaActualOUT = (i * 2);
-            int indexColumnaActualOUT = (j * 2);
+                int indexFilaActualOUT = (i * 2);
+                int indexColumnaActualOUT = (j * 2);
 
-            for (int k = 0; k < 2; k++)
-            {
-                for (int l = 0; l < 2; l++)
+                for (int k = 0; k < 2; k++)
                 {
-                    outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
-                    outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
-                    outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l];
+                    for (int l = 0; l < 2; l++)
+                    {
+                        /* outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
+                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
+                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l]; */
+                        outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = R2x2[k][l];
+                        outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = G2x2[k][l];
+                        outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B2x2[k][l];
+                    }
                 }
             }
         }
+    }else{
     }
 }
-*/
+
 
 int main(int argc, char **argv)
 {    
@@ -572,8 +583,8 @@ int main(int argc, char **argv)
     char* nombreSalida = argv[2];
     NUMTHREADS = atoi(argv[3]); */
 
-    string nombreEntrada = "imagen1080p.jpg";
-    string nombreSalida = "imagen1080p-a480CUDAAAAAAA.jpg";
+    string nombreEntrada = "imagen4k.jpg";
+    string nombreSalida = "imagen4k-a480CUDAAAAAAA.jpg";
 
     //ofstream file;
 
@@ -888,15 +899,17 @@ int main(int argc, char **argv)
         }
         reduccion1080<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
     }
-    /*else if (rows == 2160)
+    else if (rows == 2160)
     {
         numeroColumnasImg = cols / 9;
-        for (i = 0; i < NUMTHREADS; i++)
+        err = cudaMemcpy(d_numeroColumnasImg, &numeroColumnasImg, sizeEntero, cudaMemcpyHostToDevice);
+        if (err != cudaSuccess)
         {
-            threadId[i] = i;
-            pthread_create(&thread[i], NULL, reduccion4k, &threadId[i]);
+            fprintf(stderr, "Failed to copy valor numeroColumnasImg from host to device (error code %s)!\n", cudaGetErrorString(err));
+            exit(EXIT_FAILURE);
         }
-    }*/
+        reduccion4k<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
+    }
     else
     {
         cout << "Resolución no permitida" << endl;

@@ -859,8 +859,8 @@ int main(int argc, char **argv)
     // Launch add() kernel on GPU with N blocks
 
 
-    BLOCKSPERGRID=2; //quitar
-    NUMTHREADSPerBlock=4; //quitar
+    BLOCKSPERGRID=1; //quitar
+    NUMTHREADSPerBlock=8; //quitar
     reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
 
 
@@ -905,36 +905,6 @@ int main(int argc, char **argv)
 
 
     //************************** CUDA **********************************
-
-    index = 0;
-    for(int i = outRows/2; i<(outRows/2)+20;i++){
-        for(int j = outCols/2; j<(outCols/2)+20;j++){
-            printf("%d  ", outR[index]);
-            index++;
-        }
-        printf("-----\n");
-    }
-    printf("*******\n");
-
-    index = 0;
-    for(int i = outRows/2; i<(outRows/2)+20;i++){
-        for(int j = outCols/2; j<(outCols/2)+20;j++){
-            printf("%d  ", outG[index]);
-            index++;
-        }
-        printf("-----\n");
-    }
-    printf("*******\n");
-
-    index = 0;
-    for(int i = outRows/2; i<(outRows/2)+20;i++){
-        for(int j = outCols/2; j<(outCols/2)+20;j++){
-            printf("%d  ", outB[index]);
-            index++;
-        }
-        printf("-----\n");
-    }
-    printf("*******\n");
 
 
     /*

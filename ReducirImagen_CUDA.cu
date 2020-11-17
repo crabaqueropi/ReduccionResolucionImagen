@@ -758,8 +758,8 @@ int main(int argc, char **argv)
     char* nombreSalida = argv[2];
     NUMTHREADS = atoi(argv[3]); */
 
-    string nombreEntrada = "imagen1080p.jpg";
-    string nombreSalida = "imagen1080p-a480CUDAAAAAAA.jpg";
+    string nombreEntrada = "imagen4k.jpg";
+    string nombreSalida = "imagen4k-a480CUDAAAAAAA.jpg";
 
     //ofstream file;
 

@@ -761,6 +761,14 @@ int main(int argc, char **argv)
     string nombreEntrada = "imagen4k.jpg";
     string nombreSalida = "imagen4k-a480CUDAAAAAAA.jpg";
 
+    //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
+    int NUMTHREADSPerBlock;
+    
+    
+    BLOCKSPERGRID=40; //quitar
+    NUMTHREADS = 8160; //quitar
+    NUMTHREADSPerBlock = NUMTHREADS / BLOCKSPERGRID;
+
     //ofstream file;
 
     // Leer imágen
@@ -813,18 +821,6 @@ int main(int argc, char **argv)
     imgG = (int *)malloc(sizeImagenes); 
     imgB = (int *)malloc(sizeImagenes); 
 
-    /*imgR = new int *[rows];
-    for (size_t i = 0; i < rows; ++i)
-        imgR[i] = new int[cols];
-
-    imgG = new int *[rows];
-    for (size_t i = 0; i < rows; ++i)
-        imgG[i] = new int[cols];
-
-    imgB = new int *[rows];
-    for (size_t i = 0; i < rows; ++i)
-        imgB[i] = new int[cols];*/
-
     
     int index = 0;
     for (int i = 0; i < img.rows; i++)
@@ -849,18 +845,6 @@ int main(int argc, char **argv)
     outR = (int *)malloc(sizeImagenesOut); 
     outG = (int *)malloc(sizeImagenesOut); 
     outB = (int *)malloc(sizeImagenesOut); 
-
-    /*outR = new int *[outRows];
-    for (size_t i = 0; i < outRows; ++i)
-        outR[i] = new int[outCols];
-
-    outG = new int *[outRows];
-    for (size_t i = 0; i < outRows; ++i)
-        outG[i] = new int[outCols];
-
-    outB = new int *[outRows];
-    for (size_t i = 0; i < outRows; ++i)
-        outB[i] = new int[outCols];*/
 
     // Fin creación de matrices
 
@@ -964,16 +948,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to allocate device int d_outCols (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
-
-
-
-    //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
-    int NUMTHREADSPerBlock;
-    
-    
-    BLOCKSPERGRID=40; //quitar
-    NUMTHREADSPerBlock=204; //quitar
-    NUMTHREADS = BLOCKSPERGRID*NUMTHREADSPerBlock; //NUMTHREADSPerBlock;
 
 
     // Copy inputs to device
@@ -1133,38 +1107,6 @@ int main(int argc, char **argv)
 
     //************************** CUDA **********************************
 
-    /*
-    //Recolección Hilos y finalización toma de tiempo
-    for (i = 0; i < NUMTHREADS; i++)
-    {
-        pthread_join(thread[i], (void **)&retval);
-    }
-    gettimeofday(&tval_after, NULL);
-    timersub(&tval_after, &tval_before, &tval_result);
-    
-    if (rows == 720){
-        ofstream file;
-        file.open("./720.txt", ofstream::app);
-        file << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
-        file.close();
-    }else if (rows == 1080){
-        ofstream file;
-        file.open("./1080.txt", ofstream::app);
-        file << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
-        file.close();
-    }else{
-        ofstream file;
-        file.open("./4k.txt", ofstream::app);
-        file << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec)/1000000 << endl;
-        file.close();
-    }
-    //Fin Recolección Hilos y finalización toma de tiempo*****
-    */
-
-    //Pasar matrices resultantes a Imagen de salida
-    //cout<<outB[0][0]<<endl;
-    //cout<<outB[15][40]<<endl;
-
     index = 0;
     for (int i = 0; i < outRows; i++)
     {
@@ -1186,36 +1128,6 @@ int main(int argc, char **argv)
     free(outR);
     free(outG);
     free(outB);
-    //free(imgB);
-    /*for (size_t i = 0; i < rows; ++i)
-        delete imgR[i];
-    delete imgR;
-
-    for (size_t i = 0; i < rows; ++i)
-        delete imgG[i];
-    delete imgG;
-
-    for (size_t i = 0; i < rows; ++i)
-        delete imgB[i];
-    delete imgB;
-
-    for (size_t i = 0; i < outRows; ++i)
-        delete outR[i];
-    delete outR;
-
-    for (size_t i = 0; i < outRows; ++i)
-        delete outG[i];
-    delete outG;
-
-    for (size_t i = 0; i < outRows; ++i)
-        delete outB[i];
-    delete outB;*/
-
-    //Fin Borrar matrices
-
-    // Imprimir Imagen original y convertida. DESCOMENTAR LAS SIGUIENTES LINEAS SI SE QUIEREN VER LAS IMAGENES DE ENTRADA Y SALIDA RESPECTIVAMENTE
-    //imshow(nombreEntrada, img);
-    //imshow(nombreSalida, imgOut);
 
     //Guarda imágen de salida en directorio local
     imwrite(nombreSalida, imgOut);

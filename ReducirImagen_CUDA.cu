@@ -846,6 +846,11 @@ int main(int argc, char **argv)
     // Fin creación de matrices
 
     //************************** CUDA **********************************
+
+    struct timeval tval_before, tval_after, tval_result; // Inicio toma de tiempo
+    gettimeofday(&tval_before, NULL);
+
+
     int *d_imgR;
     int *d_imgG;
     int *d_imgB;
@@ -1103,6 +1108,31 @@ int main(int argc, char **argv)
 
 
     //************************** CUDA **********************************
+
+    gettimeofday(&tval_after, NULL); // Fin toma de tiempo
+    timersub(&tval_after, &tval_before, &tval_result);
+
+    if (rows == 720)
+    {
+        ofstream file;
+        file.open("./720.txt", ofstream::app);
+        file << BLOCKSPERGRID << " BLOQUES y " << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
+        file.close();
+    }
+    else if (rows == 1080)
+    {
+        ofstream file;
+        file.open("./1080.txt", ofstream::app);
+        file << BLOCKSPERGRID << " BLOQUES y " << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
+        file.close();
+    }
+    else
+    {
+        ofstream file;
+        file.open("./4k.txt", ofstream::app);
+        file << BLOCKSPERGRID << " BLOQUES y " << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
+        file.close();
+    }
 
     index = 0;
     for (int i = 0; i < outRows; i++)

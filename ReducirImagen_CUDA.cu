@@ -1117,21 +1117,21 @@ int main(int argc, char **argv)
     if (rows == 720)
     {
         ofstream file;
-        file.open("./720.txt", ofstream::app);
+        file.open("./CUDA-720.txt", ofstream::app);
         file << BLOCKSPERGRID << " BLOQUES y " << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
         file.close();
     }
     else if (rows == 1080)
     {
         ofstream file;
-        file.open("./1080.txt", ofstream::app);
+        file.open("./CUDA-1080.txt", ofstream::app);
         file << BLOCKSPERGRID << " BLOQUES y " << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
         file.close();
     }
     else
     {
         ofstream file;
-        file.open("./4k.txt", ofstream::app);
+        file.open("./CUDA-4k.txt", ofstream::app);
         file << BLOCKSPERGRID << " BLOQUES y " << NUMTHREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
         file.close();
     }

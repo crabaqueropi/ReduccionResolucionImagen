@@ -393,10 +393,11 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
     printf("* %d\n", outRowsAux);
     printf("* %d\n", outColsAux);*/
 
-    if (NUMTHREADS<=240){
+    int numeroFilasImg = 240; // 720/3
+
+    if (NUMTHREADS <= numeroFilasImg){
 
         int filaInicial, filaFinal; //, threadId = *(int *)args;
-        int numeroFilasImg = 240; // 720/3
         filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
         filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
         for (int i = filaInicial; i <= filaFinal; i++)
@@ -442,6 +443,11 @@ __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *ou
             }
         }
     }else{
+        int numHilosPorFila = NUMTHREADS / numeroFilasImg;
+        int fila; 
+        int colmunaInicial, columnaFinal; 
+        
+        
     } 
 
 }
@@ -796,8 +802,8 @@ int main(int argc, char **argv)
     int NUMTHREADSPerBlock = 4;
     
     
-    BLOCKSPERGRID=30; //quitar
-    NUMTHREADSPerBlock=4; //quitar
+    BLOCKSPERGRID=1; //quitar
+    NUMTHREADSPerBlock=2; //quitar
     NUMTHREADS = BLOCKSPERGRID*NUMTHREADSPerBlock; //NUMTHREADSPerBlock;
 
 

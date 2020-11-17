@@ -630,10 +630,11 @@ __global__ void reduccion4k(int *imgR, int *imgG, int *imgB, int *outR, int *out
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x; 
 
-    if (NUMTHREADS<=240){
+    int numeroFilasImg = 240; // 2160/9
+
+    if (NUMTHREADS <= numeroFilasImg){
         int filaInicial, filaFinal;
 
-        int numeroFilasImg = 240; // 2160/9
         filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
         filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
 
@@ -685,6 +686,65 @@ __global__ void reduccion4k(int *imgR, int *imgG, int *imgB, int *outR, int *out
             }
         }
     }else{
+        int numHilosPorFila = NUMTHREADS / numeroFilasImg;
+        int fila = threadId / numHilosPorFila; 
+        
+        int columnasPorHilo = numeroColumnasImg / numHilosPorFila;
+        if (columnasPorHilo * numHilosPorFila < numeroColumnasImg) ++columnasPorHilo; // Aplicarle función Techo
+
+        int colmunaInicial = columnasPorHilo * (threadId % numHilosPorFila);
+        
+        if(colmunaInicial < cols){  // Los hilos que no cumplen esta condición no hacen nada
+            int columnaFinal = colmunaInicial + columnasPorHilo - 1;
+            if(columnaFinal >= cols){
+                columnaFinal = cols - 1;
+            }
+
+            for (int j = colmunaInicial; j <= columnaFinal; j++)
+            {
+                int R9x9[9][9];
+                int G9x9[9][9];
+                int B9x9[9][9];
+
+                int indexFilaActual = (fila * 9);
+                int indexColumnaActual = (j * 9);
+
+                for (int k = 0; k < 9; k++)
+                {
+                    for (int l = 0; l < 9; l++)
+                    {
+                        /* R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l]; */
+                        R9x9[k][l] = imgR[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        G9x9[k][l] = imgG[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        B9x9[k][l] = imgB[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                    }
+                }
+
+                int R2x2[2][2];
+                int G2x2[2][2];
+                int B2x2[2][2];
+
+                reducirMatriz9x9a2x2(R9x9, G9x9, B9x9, R2x2, G2x2, B2x2);
+
+                int indexFilaActualOUT = (fila * 2);
+                int indexColumnaActualOUT = (j * 2);
+
+                for (int k = 0; k < 2; k++)
+                {
+                    for (int l = 0; l < 2; l++)
+                    {
+                        /* outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R2x2[k][l];
+                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G2x2[k][l];
+                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B2x2[k][l]; */
+                        outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = R2x2[k][l];
+                        outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = G2x2[k][l];
+                        outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B2x2[k][l];
+                    }
+                }
+            }        
+        }
     }
 }
 
@@ -908,7 +968,7 @@ int main(int argc, char **argv)
 
 
     //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
-    int NUMTHREADSPerBlock = 4;
+    int NUMTHREADSPerBlock;
     
     
     BLOCKSPERGRID=40; //quitar

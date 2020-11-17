@@ -385,6 +385,7 @@ __device__ int CalPosicion(int i, int j, int numCol){
 __global__ void reduccion720(int *imgR, int *imgG, int *imgB, int *outR, int *outG, int *outB, int numeroColumnasImg, int NUMTHREADS, int rows, int cols, int outRows, int outCols)
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;   
+
     printf("* %d\n", threadId);
     
     /*printf("* %d\n", numeroColumnasImg);
@@ -590,8 +591,8 @@ int main(int argc, char **argv)
     char* nombreSalida = argv[2];
     NUMTHREADS = atoi(argv[3]); */
 
-    string nombreEntrada = "imagen4k.jpg";
-    string nombreSalida = "imagen4k-a480CUDAAAAAAA.jpg";
+    string nombreEntrada = "imagen720p.jpg";
+    string nombreSalida = "imagen720p-a480CUDAAAAAAA.jpg";
 
     //ofstream file;
 

@@ -11,8 +11,8 @@
 using namespace std;
 using namespace cv;
 
-int BLOCKSPERGRID  = 16;
-int NUMTHREADS = 64;
+int BLOCKSPERGRID;
+int NUMTHREADS;
 
 int *outR;
 int *outG;
@@ -754,20 +754,17 @@ int main(int argc, char **argv)
     // Error code to check return values for CUDA calls
     cudaError_t err = cudaSuccess;
 
-    /* char* nombreEntrada = argv[1];
+    char* nombreEntrada = argv[1];
     char* nombreSalida = argv[2];
-    NUMTHREADS = atoi(argv[3]); */
+    BLOCKSPERGRID = atoi(argv[3]);
+    NUMTHREADS = atoi(argv[4]);
 
-    string nombreEntrada = "imagen4k.jpg";
-    string nombreSalida = "imagen4k-a480CUDAAAAAAA.jpg";
-
-    //int NUMTHREADSPerBlock = NUMTHREADS/BLOCKSPERGRID;
-    int NUMTHREADSPerBlock;
+/*     string nombreEntrada = "imagen4k.jpg";
+    string nombreSalida = "imagen4k-a480CUDAAAAAAA.jpg"; */   
     
-    
-    BLOCKSPERGRID=40; //quitar
-    NUMTHREADS = 8160; //quitar
-    NUMTHREADSPerBlock = NUMTHREADS / BLOCKSPERGRID;
+    /* BLOCKSPERGRID=40; //quitar
+    NUMTHREADS = 8160; //quitar */
+    int NUMTHREADSPerBlock = NUMTHREADS / BLOCKSPERGRID;
 
     //ofstream file;
 

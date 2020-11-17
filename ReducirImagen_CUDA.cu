@@ -507,10 +507,10 @@ __global__ void reduccion1080(int *imgR, int *imgG, int *imgB, int *outR, int *o
 {
     int threadId = threadIdx.x + blockIdx.x * blockDim.x; 
 
-    if (NUMTHREADS<=120){
-        int filaInicial, filaFinal;
+    int numeroFilasImg = 120; // 1080/9
 
-        int numeroFilasImg = 120; // 1080/9
+    if (NUMTHREADS <= numeroFilasImg){
+        int filaInicial, filaFinal;
 
         filaInicial = (numeroFilasImg / NUMTHREADS) * threadId;
         filaFinal = filaInicial + ((numeroFilasImg / NUMTHREADS) - 1);
@@ -563,6 +563,65 @@ __global__ void reduccion1080(int *imgR, int *imgG, int *imgB, int *outR, int *o
             }
         }
     }else{
+        int numHilosPorFila = NUMTHREADS / numeroFilasImg;
+        int fila = threadId / numHilosPorFila; 
+        
+        int columnasPorHilo = numeroColumnasImg / numHilosPorFila;
+        if (columnasPorHilo * numHilosPorFila < numeroColumnasImg) ++columnasPorHilo; // Aplicarle función Techo
+
+        int colmunaInicial = columnasPorHilo * (threadId % numHilosPorFila);
+        
+        if(colmunaInicial < cols){  // Los hilos que no cumplen esta condición no hacen nada
+            int columnaFinal = colmunaInicial + columnasPorHilo - 1;
+            if(columnaFinal >= cols){
+                columnaFinal = cols - 1;
+            }
+
+            for (int j = colmunaInicial; j <= columnaFinal; j++)
+            {
+                int R9x9[9][9];
+                int G9x9[9][9];
+                int B9x9[9][9];
+
+                int indexFilaActual = (fila * 9);
+                int indexColumnaActual = (j * 9);
+
+                for (int k = 0; k < 9; k++)
+                {
+                    for (int l = 0; l < 9; l++)
+                    {
+                        //R9x9[k][l] = imgR[indexFilaActual + k][indexColumnaActual + l];
+                        //G9x9[k][l] = imgG[indexFilaActual + k][indexColumnaActual + l];
+                        //B9x9[k][l] = imgB[indexFilaActual + k][indexColumnaActual + l];
+                        R9x9[k][l] = imgR[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        G9x9[k][l] = imgG[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                        B9x9[k][l] = imgB[CalPosicion(indexFilaActual + k,indexColumnaActual + l, cols)];
+                    }
+                }
+
+                int R4x4[4][4];
+                int G4x4[4][4];
+                int B4x4[4][4];
+
+                reducirMatriz9x9a4x4(R9x9, G9x9, B9x9, R4x4, G4x4, B4x4);
+
+                int indexFilaActualOUT = (fila * 4);
+                int indexColumnaActualOUT = (j * 4);
+
+                for (int k = 0; k < 4; k++)
+                {
+                    for (int l = 0; l < 4; l++)
+                    {
+                        /* outR[indexFilaActualOUT + k][indexColumnaActualOUT + l] = R4x4[k][l];
+                        outG[indexFilaActualOUT + k][indexColumnaActualOUT + l] = G4x4[k][l];
+                        outB[indexFilaActualOUT + k][indexColumnaActualOUT + l] = B4x4[k][l]; */
+                        outR[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = R4x4[k][l];
+                        outG[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = G4x4[k][l];
+                        outB[CalPosicion(indexFilaActualOUT + k, indexColumnaActualOUT + l, outCols)] = B4x4[k][l];
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -639,8 +698,8 @@ int main(int argc, char **argv)
     char* nombreSalida = argv[2];
     NUMTHREADS = atoi(argv[3]); */
 
-    string nombreEntrada = "imagen720p.jpg";
-    string nombreSalida = "imagen720p-a480CUDAAAAAAA.jpg";
+    string nombreEntrada = "imagen1080p.jpg";
+    string nombreSalida = "imagen1080p-a480CUDAAAAAAA.jpg";
 
     //ofstream file;
 

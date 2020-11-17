@@ -1112,6 +1112,8 @@ int main(int argc, char **argv)
     gettimeofday(&tval_after, NULL); // Fin toma de tiempo
     timersub(&tval_after, &tval_before, &tval_result);
 
+    printf("\nTime elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+
     if (rows == 720)
     {
         ofstream file;

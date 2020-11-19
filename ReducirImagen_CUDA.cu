@@ -1037,9 +1037,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "Failed to copy valor numeroColumnasImg from host to device (error code %s)!\n", cudaGetErrorString(err));
             exit(EXIT_FAILURE);
         }
-
-        BLOCKSPERGRID = 1;
-        NUMTHREADSPerBlock=1;
+        
         cout << "BLOCKSPERGRID: " << BLOCKSPERGRID << "\nNUMTHREADSPerBlock: " << NUMTHREADSPerBlock << "\nNUMTHREADS: " << NUMTHREADS << endl;
 
         reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);

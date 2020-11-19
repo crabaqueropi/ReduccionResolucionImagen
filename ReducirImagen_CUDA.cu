@@ -1037,6 +1037,9 @@ int main(int argc, char **argv)
             fprintf(stderr, "Failed to copy valor numeroColumnasImg from host to device (error code %s)!\n", cudaGetErrorString(err));
             exit(EXIT_FAILURE);
         }
+
+        cout << "BLOCKSPERGRID: " << BLOCKSPERGRID << "\nNUMTHREADSPerBlock: " << NUMTHREADSPerBlock << "\nNUMTHREADS: " << NUMTHREADS << endl;
+
         reduccion720<<<BLOCKSPERGRID, NUMTHREADSPerBlock>>>(d_imgR, d_imgG, d_imgB, d_outR, d_outG, d_outB, numeroColumnasImg, NUMTHREADS, rows, cols, outRows, outCols);
     }
     else if (rows == 1080)
@@ -1112,7 +1115,7 @@ int main(int argc, char **argv)
     gettimeofday(&tval_after, NULL); // Fin toma de tiempo
     timersub(&tval_after, &tval_before, &tval_result);
 
-    //printf("\nTime elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+    printf("\nTime elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
 
     if (rows == 720)
     {

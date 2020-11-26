@@ -847,8 +847,7 @@ int main(int argc, char **argv)
 
     //************************** CUDA **********************************
 
-    struct timeval tval_before, tval_after, tval_result; // Inicio toma de tiempo
-    gettimeofday(&tval_before, NULL);
+    
 
 
     int *d_imgR;
@@ -1026,6 +1025,10 @@ int main(int argc, char **argv)
         fprintf(stderr, "Failed to copy valor outCols from host to device (error code %s)!\n", cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+
+
+    struct timeval tval_before, tval_after, tval_result; // Inicio toma de tiempo
+    gettimeofday(&tval_before, NULL);
 
     //Inicio Conversión**********************************
     if (rows == 720)

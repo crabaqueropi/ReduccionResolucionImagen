@@ -22,6 +22,7 @@ int **imgR;
 int **imgG;
 int **imgB;
 int numeroColumnasImg = 0;
+int yaImprimio = false;
 
 void matriz4x4Amatriz2x2(int imgR[4][4], int imgG[4][4], int imgB[4][4], int outR[2][2], int outG[2][2], int outB[2][2])
 { // recibo una matríz cuadrada con numero par de filas (nxn)
@@ -667,17 +668,18 @@ int main(int argc, char **argv)
     gettimeofday(&tval_before, NULL);
     //  **************
 
+    int ID, numprocs;
+
     if (rows == 720)
     {
         numeroColumnasImg = cols / 3;
 
         MPI_Init(&argc, &argv);
-        int ID, numprocs;
         MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
         MPI_Comm_rank(MPI_COMM_WORLD, &ID);
-        THREADS = 1;
+        THREADS = numprocs;
         ID = 0;
-        reduccion720(ID, THREADS, imgR, imgG, imgB, outRAux, outGAux, outBAux);
+        reduccion720(ID, 1, imgR, imgG, imgB, outRAux, outGAux, outBAux);
         sumarMatrices(outRows, outCols,outRAux, outGAux, outBAux);
         MPI_Finalize();
 
@@ -693,12 +695,11 @@ int main(int argc, char **argv)
         numeroColumnasImg = cols / 9;
 
         MPI_Init(&argc, &argv);
-        int ID, numprocs;
         MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
         MPI_Comm_rank(MPI_COMM_WORLD, &ID);
-        THREADS = 1;
+        THREADS = numprocs;
         ID = 0;
-        reduccion1080(ID, THREADS, imgR, imgG, imgB, outRAux, outGAux, outBAux);
+        reduccion1080(ID,1, imgR, imgG, imgB, outRAux, outGAux, outBAux);
         sumarMatrices(outRows, outCols,outRAux, outGAux, outBAux);
         MPI_Finalize();
 
@@ -714,12 +715,11 @@ int main(int argc, char **argv)
         numeroColumnasImg = cols / 9;
 
         MPI_Init(&argc, &argv);
-        int ID, numprocs;
         MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
         MPI_Comm_rank(MPI_COMM_WORLD, &ID);
-        THREADS = 1;
+        THREADS = numprocs;
         ID = 0;
-        reduccion4k(ID, THREADS, imgR, imgG, imgB, outRAux, outGAux, outBAux);
+        reduccion4k(ID, 1, imgR, imgG, imgB, outRAux, outGAux, outBAux);
         sumarMatrices(outRows, outCols,outRAux, outGAux, outBAux);
         MPI_Finalize();
 
@@ -738,27 +738,31 @@ int main(int argc, char **argv)
     gettimeofday(&tval_after, NULL);
     timersub(&tval_after, &tval_before, &tval_result);
 
-    if (rows == 720)
-    {
-        ofstream file;
-        file.open("./720.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
-        file.close();
+    if (yaImprimio == false){
+        if (rows == 720)
+        {
+            ofstream file;
+            file.open("./720.txt", ofstream::app);
+            file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
+            file.close();
+        }
+        else if (rows == 1080)
+        {
+            ofstream file;
+            file.open("./1080.txt", ofstream::app);
+            file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
+            file.close();
+        }
+        else
+        {
+            ofstream file;
+            file.open("./4k.txt", ofstream::app);
+            file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
+            file.close();
+        }
+        yaImprimio = true;
     }
-    else if (rows == 1080)
-    {
-        ofstream file;
-        file.open("./1080.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
-        file.close();
-    }
-    else
-    {
-        ofstream file;
-        file.open("./4k.txt", ofstream::app);
-        file << THREADS << " HILOS: " << (long double)tval_result.tv_sec + (long double)(tval_result.tv_usec) / 1000000 << endl;
-        file.close();
-    }
+    
     //Fin Recolección Hilos y finalización toma de tiempo*****
 
     //Pasar matrices resultantes a Imagen de salida

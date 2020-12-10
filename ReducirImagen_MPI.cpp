@@ -431,7 +431,7 @@ void reduccion720(int threadId, int THREADS, int **imgR, int **imgG, int **imgB,
     }
 }
 
-void reduccion1080(int threadId)
+void reduccion1080(int threadId, int THREADS, int **imgR, int **imgG, int **imgB, int **outR, int **outG, int **outB)
 {
     int filaInicial, filaFinal;
 
@@ -483,7 +483,7 @@ void reduccion1080(int threadId)
     }
 }
 
-void reduccion4k(int threadId)
+void reduccion4k(int threadId, int THREADS, int **imgR, int **imgG, int **imgB, int **outR, int **outG, int **outB)
 {
     int filaInicial, filaFinal;
 
@@ -553,8 +553,8 @@ int main(int argc, char **argv)
     //char *nombreSalida = argv[2];
     //THREADS = atoi(argv[3]);
 
-    char nombreEntrada[] = "imagen720p.jpg";
-    char nombreSalida[] = "imagen720p_a_480p.jpg";
+    char nombreEntrada[] = "imagen4k.jpg";
+    char nombreSalida[] = "imagen4k_a_480p.jpg";
 
     //ofstream file;
 
@@ -675,7 +675,8 @@ int main(int argc, char **argv)
         int ID, numprocs;
         MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
         MPI_Comm_rank(MPI_COMM_WORLD, &ID);
-        THREADS = numprocs;
+        THREADS = 1;
+        ID = 0;
         reduccion720(ID, THREADS, imgR, imgG, imgB, outRAux, outGAux, outBAux);
         sumarMatrices(outRows, outCols,outRAux, outGAux, outBAux);
         MPI_Finalize();
@@ -691,6 +692,16 @@ int main(int argc, char **argv)
 
         numeroColumnasImg = cols / 9;
 
+        MPI_Init(&argc, &argv);
+        int ID, numprocs;
+        MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+        MPI_Comm_rank(MPI_COMM_WORLD, &ID);
+        THREADS = 1;
+        ID = 0;
+        reduccion1080(ID, THREADS, imgR, imgG, imgB, outRAux, outGAux, outBAux);
+        sumarMatrices(outRows, outCols,outRAux, outGAux, outBAux);
+        MPI_Finalize();
+
         /* #pragma omp parallel num_threads(THREADS)
         {
             int ID = omp_get_thread_num();
@@ -701,6 +712,16 @@ int main(int argc, char **argv)
     {
 
         numeroColumnasImg = cols / 9;
+
+        MPI_Init(&argc, &argv);
+        int ID, numprocs;
+        MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+        MPI_Comm_rank(MPI_COMM_WORLD, &ID);
+        THREADS = 1;
+        ID = 0;
+        reduccion4k(ID, THREADS, imgR, imgG, imgB, outRAux, outGAux, outBAux);
+        sumarMatrices(outRows, outCols,outRAux, outGAux, outBAux);
+        MPI_Finalize();
 
         /* #pragma omp parallel num_threads(THREADS)
         {
